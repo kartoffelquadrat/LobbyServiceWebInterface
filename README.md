@@ -9,10 +9,21 @@ It is referenced as sub-repository by the LobbyService master, but is not pulled
 
 ## Setup
 
- * Clone the Lobby-Service as usually.
- * ```cd``` into ```src/main/resources```
- * Add this repository as subrepo in a dedicated folder ```static```:  
-```git submodule add https://github.com/kartoffelquadrat/LobbyServiceWebInterface.git static```
+ * Clone the Lobby-Service, ```cd``` into the LobbyService root.
+ * Advise git to initiate all referenced subrepos:  
+```bash
+git submodule update --init --recursive
+```
+ * Manually attach the Sub-Repos internal HEAD, so you can conveniently push changes:  
+```bash
+cd src/main/resources/static
+git branch
+git checkout main
+```
+ * For future submodule pulls, call from the LobbyService root:  
+```bash
+git pull --recurse-submodules
+```
  * On next reboot the LobbyService will automatically power up the web interface, in addition to the default REST-API.
 
 ## Usage
