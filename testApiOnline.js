@@ -1,15 +1,17 @@
-function enableJSElements() {
+/**
+ * Helper functions to enable a warning block in case any communication with the server failed.
+ */
+
+function testApiOnline() {
     fetch('/api/online')
         .then(response => {
-            console.log(response);
-            if(response != 200)
-                console.log("marking as offline");
+            if(response.status != 200)
                 markOffline();
         })
         .catch(() => markOffline());    // for some reason catch clause is triggered.
 }
 
 function markOffline() {
-    consol.log("removing class");
+    console.log("removing class");
     $('#notonline').removeClass('d-none');
 }

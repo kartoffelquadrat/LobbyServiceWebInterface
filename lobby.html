@@ -15,13 +15,11 @@
     <script type="text/javascript" src="testApiOnline.js"></script>
     <script type="text/javascript" src="lobby.js"></script>
 <!--    <script type="text/javascript" src="oauth2client.js"></script>-->
-    <script type="text/javascript" src="maxRestUtils.js"></script>
     <script type="text/javascript" src="asyncGet.js"></script>
 </head>
 
-<!--"onload"-script removes API unreachable warning if backend was succesfully tested-->
-<body onload="anonymousIntercept();setupNavbar();">
-<!--<body onload="enableJSElements();prepareLobbyPage()">-->
+<!--"onload"-script removes API unreachable warning if backend was successfully tested-->
+<body onload="anonymousIntercept();setupNavbar();testApiOnline();prepareLobbyPage()">
 <div id=RowDivWithBackground class="container fill bg-white">
 
     <!--dynamic load would be better than static copies over different html files. But it causes issues with the handler mapping (order messed up / unreliable.)-->
@@ -56,15 +54,18 @@
     </nav>
 
 
-    <!--    actual page starts here-->
-    <br/>
-    <h1 style="text-align:center">Lobby</h1>
-    <title>Lobby</title>
+    <!--    white overlay, perfect responsiveness-->
+    <div class=fillinner>
 
-    <!--error message that is automatically removed from DOM if server is reachable (testApiOnline.js)-->
-    <div id='notonline' class="alert alert-danger mt-5 col-md-12" role="alert">
-        No connection to server!
-    </div>
+        <!--actual page starts here-->
+        <br/>
+        <h1 style="text-align:center" class="title">Lobby</h1>
+        <title>Lobby</title>
+
+        <!--error message that is automatically removed from DOM if server is reachable (testApiOnline.js)-->
+        <div id='notonline' class="alert alert-danger mt-5 col-md-12 d-none" role="alert">
+            No connection to server!
+        </div>
 
     <!--form to register a new user.-->
     <!--callback is registered in accounts.js -->

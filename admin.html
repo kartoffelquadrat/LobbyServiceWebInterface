@@ -14,11 +14,10 @@
     <script type="text/javascript" src="md5.js"></script>
     <script type="text/javascript" src="testApiOnline.js"></script>
     <script type="text/javascript" src="admin.js"></script>
-    <script type="text/javascript" src="maxRestUtils.js"></script>
 </head>
 
 <!--"onload"-script removes API unreachable warning if backend was successfully tested-->
-<body onload="anonymousIntercept();setupNavbar();enableJSElements();registerButtonHandlers();updateDisplayedAccounts();">
+<body onload="anonymousIntercept();setupNavbar();testApiOnline();registerButtonHandlers();updateDisplayedAccounts();">
 <div id=RowDivWithBackground class="container bg-white fill">
 
     <!--dynamic load would be better than static copies over different htmlk files. But it causes issues with the handler mapping (order messed up / unreliable.)-->
