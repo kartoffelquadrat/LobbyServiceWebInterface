@@ -39,19 +39,21 @@ function updateSessionsTable(sessions) {
     $('<tr>' +
         '<th id="game">Game</th>' +
         '<th id="initiator">Initiator</th>' +
-        '<th id="fill">#Players</th>' +
+        '<th id="fill">Players</th>' +
         '<th id="action"> </th>' +
         '</tr>'
     ).appendTo('#sessiontable');
 
 
     // iterate over players, print all info per player, and a remove button
-    $.each(sessions.unlaunchedGames, function (key, session) {  // ToDo: fix for updated sessions structure.
+    $.each(sessions.sessions, function (key, session) {  // ToDo: fix for updated sessions structure.
+        console.log(key + " - " + session);
         $('<tr>' +
-            '<td>' + session.gameKind + '</td>' +
-            '<td>' + session.creator + '</td>' +
-            '<td>' + session.players.length + '</td>' +
-            //'<td>' + session.players.size() + '</td>' +
+            '<td>' + session.gameParameters.name + getPlayerIntervalString(session) + '</td>' +
+            '<td>' + capitalizeFirstLetter(session.creator) + '</td>' +
+            '<td>' + getPlayersIndicatorString(session) + '</td>' +
+            // '<td>' + session.players.size() + " / " +  + '</td>' +
+            //'<td>' +  + '</td>' +
             // add a button that allows removing that user
             '<td>        ' +
             '<div class="input-group-append float-right">\n' +
@@ -66,6 +68,35 @@ function updateSessionsTable(sessions) {
     })
 }
 
+/**
+ * Builds an indicator string that tells how many players are allows in a session.
+ * If the max and min value are identical, the string displays just a value, not an interval.
+ * @param session
+ */
+function getPlayerIntervalString(session) {
+    let min = session.gameParameters.minSessionPlayers;
+    let max = session.gameParameters.maxSessionPlayers;
+
+    if (min === max)
+        return ' [' + min + ']';
+    else
+        return ' [' + min + '-' + max + ']';
+}
+
+/**
+ * Builds an indicator string that tells amount and set of players registered to a session.
+ */
+function getPlayersIndicatorString(session) {
+
+    let players = session.players;
+    let playerString = '[' + players.length + ']:';
+
+    $.each(players, function (index, player) {
+        playerString = playerString + ' ' + capitalizeFirstLetter(player);
+    });
+    return playerString;
+}
+
 function joinSession(session) {
     console.log("Joining: " + session.data.id);
     //
@@ -77,9 +108,11 @@ function joinSession(session) {
  */
 function startSession() {
 
+    let selectedGame = document.getElementById('boardgameoptions');
+
     let createSessionForm = {
         "creator": getUserName(),
-        "game": "Xox",  // Todo: dynamically retrieve from selection.
+        "game": selectedGame.value,
         "savegame": ""
     }
 

@@ -50,7 +50,7 @@ function parseAndClearRegistrationFields() {
 
     // Construct a registration form from the parsed input data
     let registrationForm = {
-        name: nameField.val(),
+        name: nameField.val().toLowerCase(),
         password: passwordField.val(),
         preferredColour: colourField.value.slice(1).toUpperCase(),
         role: "ROLE_" + adminField.value.toUpperCase()

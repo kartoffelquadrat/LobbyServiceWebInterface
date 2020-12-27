@@ -36,13 +36,13 @@ function registerLoginHandler() {
 function login() {
 
     // read out login data from input fields
-    let username = document.getElementById('user-name-field').value;
+    let username = document.getElementById('user-name-field').value.toLowerCase();
     let password = document.getElementById('password-field').value;
 
     // disable button until login attempt is finished
     $('#loginButton').prop("disabled", "true");
 
-    // Lobby Serivce authentication meta-parameters and HTTP method
+    // Lobby Service authentication meta-parameters and HTTP method
     const init = {
         body: "grant_type=password&username="+username+"&password="+password,
         headers: {
