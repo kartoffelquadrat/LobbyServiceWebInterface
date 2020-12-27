@@ -27,8 +27,18 @@ function populateSessionOptions() {
  * @param sessions as the new sessions bundle. The actual sessions are in a field called sessions.
  */
 function onSessionsChanged(sessions) {
-    updateStartButtonStatus(isInSession(getUserName(), sessions.sessions));
+
+    // Disable / enable the "create new session" button.
+    updateCreateButtonStatus(isInSession(getUserName(), sessions.sessions));
+
+    // Build the HTML table, based on the received session information.
     updateSessionsTable(sessions.sessions);
+
+    // Add listeners for the generated action buttons in the generated HTML table.
+    associateJoinButtons();
+    associateLeaveButtons();
+    associateDeleteButtons();
+    associateLaunchButtons();
 }
 
 /**
@@ -48,6 +58,7 @@ function updateSessionsTable(sessions) {
         '</tr>'
     ).appendTo('#sessiontable');
 
+    let userActiveInASession = isInSession(getUserName(), sessions);
 
     // iterate over players, print all info per player, and a remove button
     $.each(sessions, function (key, session) {  // ToDo: fix for updated sessions structure.
@@ -57,8 +68,8 @@ function updateSessionsTable(sessions) {
             '<td>' + capitalizeFirstLetter(session.creator) + '</td>' +
             '<td>' + getPlayersIndicatorString(session) + '</td>' +
             '<td>        ' +
-            '<div id="actions-'+key+'" class="input-group-append float-right">\n' +
-            buildActionButtons(key, getUserName(), sessions) +
+            '<div id="actions-' + key + '" class="input-group-append float-right">\n' +
+            buildActionButtons(key, getUserName(), session, userActiveInASession) +
             '</div>' +
             '</td>' +
             '</tr>').appendTo('#sessiontable');
@@ -69,31 +80,61 @@ function updateSessionsTable(sessions) {
     })
 }
 
-function buildActionButtons(sessionkey, player, sessions)
-{
-    // flag that indicates whether the player is already involved in a session.
-    let active = isInSession(getUserName(), sessions);
+/**
+ * Prepares HTML code for the buttons section of a session row.
+ * If the player is active in at least on session (creator or player), all join buttons are deactivated. If the session
+ * matches one where the player is creator, "join is replaced by "Delete" and "Launch", where the latter is only active
+ * if the required amount of players is present. If the user is just a player participant of the session, "join" is
+ * replaced by "Leave".
+ *
+ * @param sessionkey as id of the session for which the buttons are generated
+ * @param player as the name of the currently logged in player
+ * @param sessions as the map with all sessions by their ids
+ * @param active as flag to indicate whether the player is already involved in at least one session.
+ * @returns {string} HTML code for the required buttons.
+ */
+function buildActionButtons(sessionkey, player, session, active) {
 
-//ToDo implement, based on user active status, iscreator status, isNonCreatorPlayer status... wirte javadoc for this funciton.
-    return '<button class="btn btn-outline-primary" type="button" id="join-' + sessionkey + '">Join</button>\n';
+    // if not yet involved to any session -> ordinary join button
+    if (!active)
+        return '<button class="btn btn-outline-primary" type="button" id="join-' + sessionkey + '">Join</button>\n';
+
+    // else (already involved to a session, but...)
+    else {
+        // ... not involved in this one -> deactivated join button
+        if (!session.players.includes(getUserName()))
+            return '<button class="btn btn-outline-primary disabled" type="button" id="join-' + sessionkey + '">Join</button>\n';
+
+        // ... involved in this one as ordinary player -> leave button
+        if (isNonCreatorPlayer(getUserName(), session))
+            return '<button class="btn btn-outline-warning" type="button" id="leave-' + sessionkey + '">Leave</button>\n';
+
+        // ... involved in this one as creator -> delete button, launch button (act / deact depending on player-amount)
+        return '<button class="btn btn-outline-danger" style="margin-right: 5px" type="button" id="leave-' + sessionkey + '">Delete</button>\n' +
+            '<button class="btn btn-outline-primary ' + buildDisabledLaunchTag(session) + '" type="button" id="launch-' + sessionkey + '">Launch</button>';
+    }
 }
 
 /**
- * Helper function that tells whether a player is the creator of a sessions.
- * @param player
- * @param session
+ * Helper function that tells whether a player is a non-creator player of a session.
  */
-function isCreator(player, session)
-{
-    return true; // ToDo: implement
+function isNonCreatorPlayer(player, session) {
+    let isCreator = player === session.creator;
+    let isPlayer = session.players.includes(player);
+
+    return isPlayer && !isCreator;
 }
 
 /**
- * Helper function that tells whether a player is a non-creator playr of a session.
+ * Helper function that find out whether a provided session has the right amount of player to be launched. If so, the
+ * empty string is returned. Otherwise 'disabled' is returned.
  */
-function isNonCreatorPlayer(player, session)
-{
-    return true; // ToDo: implement
+function buildDisabledLaunchTag(session) {
+
+    let currentAmount = session.players.length;
+    if (session.gameParameters.minSessionPlayers > currentAmount)
+        return 'disabled';
+    return '';
 }
 
 /**
@@ -177,7 +218,7 @@ function isInSession(playername, sessions) {
  * Helper function to set the enabled disabled status of the start button (that allows creation of new sessions).
  * Button is set to enabled if false (player is not in a session), disabled if true (player is in a session).
  */
-function updateStartButtonStatus(status) {
+function updateCreateButtonStatus(status) {
     let startButton = $('#start-session-button');
 
     if (!status) {
@@ -187,4 +228,51 @@ function updateStartButtonStatus(status) {
         startButton.addClass('disabled');
         startButton.off();
     }
+}
+
+/**
+ * Assigns join-user-to-selected-session API call to all enabled "join" buttons.
+ */
+function associateJoinButtons() {
+    console.log('Associate join buttons not yet implemented.');
+    let joinButtons = $('[id^=join-]');
+    console.log('found ' + joinButtons.length);
+    $.each(joinButtons, function (index, joinButton) {
+        let sessionJoinButtonString = joinButton.id;
+        let sessionId = sessionJoinButtonString.substring(5);
+        console.log(sessionId);
+        if (!$(joinButton).hasClass('disabled'))
+            $(joinButton).on('click', function (event) {
+                joinSession(sessionId);
+            });
+    });
+}
+
+/**
+ * Helper function to request adding a user to a resource.
+ * @param sessionid
+ */
+function joinSession(sessionid) {
+    console.log('Joining session: ' + sessionid + 'NOT YET IMPLEMENTED');
+}
+
+/**
+ * Assigns remove-user-from-selected-session API call to all "leave" buttons.
+ */
+function associateLeaveButtons() {
+    console.log('Associate leave buttons not yet implemented.');
+}
+
+/**
+ * Assigns join-user-to-selected-session API call to all "delete" buttons.
+ */
+function associateDeleteButtons() {
+    console.log('Associate delete buttons not yet implemented.');
+}
+
+/**
+ * Assigns join-user-to-selected-session API call to all enabled "launch" buttons.
+ */
+function associateLaunchButtons() {
+    console.log('Associate launch buttons not yet implemented.');
 }
