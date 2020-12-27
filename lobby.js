@@ -38,13 +38,11 @@ function onSessionsChanged(sessions) {
  */
 function updateSessionsTable(sessions) {
 
-    console.log(sessions);
-
     // reset sessions table content and re-build table's static columns (first row, bold)
     $('#sessiontable').empty();
     $('<tr>' +
         '<th id="game">Game</th>' +
-        '<th id="initiator">Initiator</th>' +
+        '<th id="creator">Creator</th>' +
         '<th id="fill">Players</th>' +
         '<th id="action"> </th>' +
         '</tr>'
@@ -58,12 +56,9 @@ function updateSessionsTable(sessions) {
             '<td>' + session.gameParameters.name + getPlayerIntervalString(session) + '</td>' +
             '<td>' + capitalizeFirstLetter(session.creator) + '</td>' +
             '<td>' + getPlayersIndicatorString(session) + '</td>' +
-            // '<td>' + session.players.size() + " / " +  + '</td>' +
-            //'<td>' +  + '</td>' +
-            // add a button that allows removing that user
             '<td>        ' +
-            '<div class="input-group-append float-right">\n' +
-            '<button class="btn btn-outline-primary" type="button" id="join-' + key + '">Join</button>\n' +
+            '<div id="actions-'+key+'" class="input-group-append float-right">\n' +
+            buildActionButtons(key, getUserName(), sessions) +
             '</div>' +
             '</td>' +
             '</tr>').appendTo('#sessiontable');
@@ -72,6 +67,33 @@ function updateSessionsTable(sessions) {
         $('#join-' + key).on('click', {id: key}, joinSession);
         // });
     })
+}
+
+function buildActionButtons(sessionkey, player, sessions)
+{
+    // flag that indicates whether the player is already involved in a session.
+    let active = isInSession(getUserName(), sessions);
+
+//ToDo implement, based on user active status, iscreator status, isNonCreatorPlayer status... wirte javadoc for this funciton.
+    return '<button class="btn btn-outline-primary" type="button" id="join-' + sessionkey + '">Join</button>\n';
+}
+
+/**
+ * Helper function that tells whether a player is the creator of a sessions.
+ * @param player
+ * @param session
+ */
+function isCreator(player, session)
+{
+    return true; // ToDo: implement
+}
+
+/**
+ * Helper function that tells whether a player is a non-creator playr of a session.
+ */
+function isNonCreatorPlayer(player, session)
+{
+    return true; // ToDo: implement
 }
 
 /**
