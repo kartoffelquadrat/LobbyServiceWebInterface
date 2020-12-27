@@ -3,11 +3,8 @@ function prepareLobbyPage() {
     // get list of games that are available and populate form drop down menu
     populateSessionOptions();
 
-    // register callback for "start"-session button.
-    $('#start-session-button').on('click', startSession);
-
     // ARL-long poll on "available-sessions"-resource and update displayed table if something changed
-    observeResource('/api/sessions?hash=', updateSessionsTable, markOffline, "");
+    observeResource('/api/sessions?hash=', onSessionsChanged, markOffline, "");
 }
 
 /**
@@ -23,6 +20,15 @@ function populateSessionOptions() {
                 $('<option>' + item + '</option>').appendTo('#boardgameoptions');
             })
         });
+}
+
+/**
+ * Called whenever the sessions resource observer registers an update
+ * @param sessions as the new sessions bundle. The actual sessions are in a field called sessions.
+ */
+function onSessionsChanged(sessions) {
+    updateStartButtonStatus(isInSession(getUserName(), sessions.sessions));
+    updateSessionsTable(sessions.sessions);
 }
 
 /**
@@ -46,7 +52,7 @@ function updateSessionsTable(sessions) {
 
 
     // iterate over players, print all info per player, and a remove button
-    $.each(sessions.sessions, function (key, session) {  // ToDo: fix for updated sessions structure.
+    $.each(sessions, function (key, session) {  // ToDo: fix for updated sessions structure.
         console.log(key + " - " + session);
         $('<tr>' +
             '<td>' + session.gameParameters.name + getPlayerIntervalString(session) + '</td>' +
@@ -57,7 +63,7 @@ function updateSessionsTable(sessions) {
             // add a button that allows removing that user
             '<td>        ' +
             '<div class="input-group-append float-right">\n' +
-            '<button class="btn btn-outline-secondary" type="button" id="join-' + key + '">Join</button>\n' +
+            '<button class="btn btn-outline-primary" type="button" id="join-' + key + '">Join</button>\n' +
             '</div>' +
             '</td>' +
             '</tr>').appendTo('#sessiontable');
@@ -123,7 +129,40 @@ function startSession() {
         method: 'post',
         body: JSON.stringify(createSessionForm)
     }).then(reply => {
+        if (reply.status == 401)
+            logout(); // ToDo: First try to renew token, call logout() if that failed.
         if (reply.status != 200)
             console.log("Failed to start session. Server replied: " + reply.status);
     });
+}
+
+/**
+ * Analyzes a received sessions object and tells whether the provided player is associated as creator-or-player in at least one session.
+ * @param playername
+ * @param sessions
+ */
+function isInSession(playername, sessions) {
+    let inSession = false;
+
+    // mark inSession true if player appears in at least one session
+    $.each(sessions, function (sessionid, session) {
+        inSession = inSession || session.players.includes(getUserName());
+    });
+    return inSession;
+}
+
+/**
+ * Helper function to set the enabled disabled status of the start button (that allows creation of new sessions).
+ * Button is set to enabled if false (player is not in a session), disabled if true (player is in a session).
+ */
+function updateStartButtonStatus(status) {
+    let startButton = $('#start-session-button');
+
+    if (!status) {
+        startButton.removeClass('disabled');
+        startButton.on('click', startSession);
+    } else {
+        startButton.addClass('disabled');
+        startButton.off();
+    }
 }
