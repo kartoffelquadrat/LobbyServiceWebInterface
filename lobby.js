@@ -1,3 +1,5 @@
+let allSessions;
+
 function prepareLobbyPage() {
 
     // get list of games that are available and populate form drop down menu
@@ -27,6 +29,8 @@ function populateSessionOptions() {
  * @param sessions as the new sessions bundle. The actual sessions are in a field called sessions.
  */
 function onSessionsChanged(sessions) {
+
+    allSessions = sessions.sessions;
 
     // Disable / enable the "create new session" button.
     updateCreateButtonStatus(isInSession(getUserName(), sessions.sessions));
@@ -168,12 +172,6 @@ function getPlayersIndicatorString(session) {
 
     });
     return playerString;
-}
-
-function joinSession(session) {
-    console.log("Joining: " + session.data.id);
-    //
-    // TODO: Actually send a PUT on the resource (playerId as payload/extra path arg)
 }
 
 /**
@@ -321,5 +319,51 @@ function leaveSession(sessionid) {
  * Assigns join-user-to-selected-session API call to all enabled "launch" buttons.
  */
 function associateLaunchButtons() {
-    console.log('Associate launch buttons not yet implemented.');
+    let launchButtons = $('[id^=launch-]');
+    $.each(launchButtons, function (index, launchButton) {
+        let sessionId = launchButton.id.substring(7);
+        if (!$(launchButton).hasClass('disabled'))
+            $(launchButton).on('click', function (event) {
+                launchSession(sessionId);
+            });
+    });
+}
+
+/**
+ * Sends API request to mark a session as launched
+ */
+function launchSession(sessionid) {
+    fetch('/api/sessions/' + sessionid + '?access_token=' + getAccessToken(), {
+        method: 'post',
+    })
+        .then(result => {
+            if (result.status == 401)
+                throw Error('Bad credentials!');
+            if (result.status == 400)
+                throw Error('Bad request! UI out of sync?');
+            forwardToSessionLanding(sessionid);
+        })
+        .catch(error => {
+            if (error.message.includes('credentials'))
+                logout();
+            else
+                alert('Already running. UI out of sync?');
+        });
+}
+
+/**
+ * Redirects to the external game service (location provided upon registration).
+ * @param session
+ */
+function forwardToSessionLanding(sessionId) {
+    //let t1 = allSessions.sessionId;
+    //let landingLocation = allSessions.get(sessionId);//.gameParameters.location;
+    $.each(allSessions, function (key, session) {  // ToDo: fix for updated sessions structure.
+        if(key === sessionId)
+        {
+            let landingLocation = session.gameParameters.location;
+            console.log('Forwarding to external game session: ' + landingLocation);
+            window.location.href = landingLocation;
+        }
+    });
 }
