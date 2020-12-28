@@ -293,9 +293,29 @@ function deleteSession(sessionid) {
  * Assigns remove-user-from-selected-session API call to all "leave" buttons.
  */
 function associateLeaveButtons() {
-    console.log('Associate leave buttons not yet implemented.');
+    let leaveButtons = $('[id^=leave-]');
+    $.each(leaveButtons, function (index, leaveButton) {
+        let sessionId = leaveButton.id.substring(6);
+        $(leaveButton).on('click', function (event) {
+            leaveSession(sessionId);
+        });
+    });
 }
 
+/**
+ * Sents API request to remove a player from a session.
+ * @param sessionid as the id of the session in question
+ */
+function leaveSession(sessionid) {
+    fetch('/api/sessions/' + sessionid + '/players/' + getUserName() + '?access_token=' + getAccessToken(), {
+        method: 'delete',
+    })
+        .then(result => {
+            if (result.status == 401)
+                throw Error('Bad credentials');
+        })
+        .catch(error => logout());
+}
 
 /**
  * Assigns join-user-to-selected-session API call to all enabled "launch" buttons.
