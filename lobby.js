@@ -64,7 +64,7 @@ function updateSessionsTable(sessions) {
     $.each(sessions, function (key, session) {  // ToDo: fix for updated sessions structure.
         console.log(key + " - " + session);
         $('<tr>' +
-            '<td>' + session.gameParameters.name + getPlayerIntervalString(session) + '</td>' +
+            '<td>' + session.gameParameters.name + '</td>' +
             '<td>' + capitalizeFirstLetter(session.creator) + '</td>' +
             '<td>' + getPlayersIndicatorString(session) + '</td>' +
             '<td>        ' +
@@ -110,7 +110,7 @@ function buildActionButtons(sessionkey, player, session, active) {
             return '<button class="btn btn-outline-warning" type="button" id="leave-' + sessionkey + '">Leave</button>\n';
 
         // ... involved in this one as creator -> delete button, launch button (act / deact depending on player-amount)
-        return '<button class="btn btn-outline-danger" style="margin-right: 5px" type="button" id="leave-' + sessionkey + '">Delete</button>\n' +
+        return '<button class="btn btn-outline-danger" style="margin-right: 5px" type="button" id="delete-' + sessionkey + '">Delete</button>\n' +
             '<button class="btn btn-outline-primary ' + buildDisabledLaunchTag(session) + '" type="button" id="launch-' + sessionkey + '">Launch</button>';
     }
 }
@@ -147,9 +147,9 @@ function getPlayerIntervalString(session) {
     let max = session.gameParameters.maxSessionPlayers;
 
     if (min === max)
-        return ' [' + min + ']';
+        return min;
     else
-        return ' [' + min + '-' + max + ']';
+        return min + '-' + max;
 }
 
 /**
@@ -158,10 +158,14 @@ function getPlayerIntervalString(session) {
 function getPlayersIndicatorString(session) {
 
     let players = session.players;
-    let playerString = '[' + players.length + ']:';
+    let playerString = '[' + players.length + '/' + getPlayerIntervalString(session) + ']: ';
 
     $.each(players, function (index, player) {
-        playerString = playerString + ' ' + capitalizeFirstLetter(player);
+        if (index == 0)
+            playerString = playerString + capitalizeFirstLetter(player);
+        else
+            playerString = playerString + ', ' + capitalizeFirstLetter(player);
+
     });
     return playerString;
 }
@@ -235,17 +239,26 @@ function updateCreateButtonStatus(status) {
  * Assigns join-user-to-selected-session API call to all enabled "join" buttons.
  */
 function associateJoinButtons() {
-    console.log('Associate join buttons not yet implemented.');
     let joinButtons = $('[id^=join-]');
-    console.log('found ' + joinButtons.length);
     $.each(joinButtons, function (index, joinButton) {
-        let sessionJoinButtonString = joinButton.id;
-        let sessionId = sessionJoinButtonString.substring(5);
-        console.log(sessionId);
+        let sessionId = joinButton.id.substring(5);
         if (!$(joinButton).hasClass('disabled'))
             $(joinButton).on('click', function (event) {
                 joinSession(sessionId);
             });
+    });
+}
+
+/**
+ * Assigns delete-selected-session API call to all enabled "delete" buttons.
+ */
+function associateDeleteButtons() {
+    let deleteButtons = $('[id^=delete-]');
+    $.each(deleteButtons, function (index, deleteButton) {
+        let sessionId = deleteButton.id.substring(7);
+        $(deleteButton).on('click', function (event) {
+            deleteSession(sessionId);
+        });
     });
 }
 
@@ -265,6 +278,17 @@ function joinSession(sessionid) {
         .catch(error => logout());
 }
 
+function deleteSession(sessionid) {
+    fetch('/api/sessions/' + sessionid + '?access_token=' + getAccessToken(), {
+        method: 'delete',
+    })
+        .then(result => {
+            if (result.status == 401)
+                throw Error('Bad credentials');
+        })
+        .catch(error => logout());
+}
+
 /**
  * Assigns remove-user-from-selected-session API call to all "leave" buttons.
  */
@@ -272,12 +296,6 @@ function associateLeaveButtons() {
     console.log('Associate leave buttons not yet implemented.');
 }
 
-/**
- * Assigns join-user-to-selected-session API call to all "delete" buttons.
- */
-function associateDeleteButtons() {
-    console.log('Associate delete buttons not yet implemented.');
-}
 
 /**
  * Assigns join-user-to-selected-session API call to all enabled "launch" buttons.
