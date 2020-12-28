@@ -75,7 +75,7 @@ function updateSessionsTable(sessions) {
             '</tr>').appendTo('#sessiontable');
 
         // also register callback for the newly created "remove" button.
-        $('#join-' + key).on('click', {id: key}, joinSession);
+        // $('#join-' + key).on('click', {id: key}, joinSession);
         // });
     })
 }
@@ -223,6 +223,7 @@ function updateCreateButtonStatus(status) {
 
     if (!status) {
         startButton.removeClass('disabled');
+        startButton.off(); // avoid double registrations.
         startButton.on('click', startSession);
     } else {
         startButton.addClass('disabled');
@@ -253,7 +254,15 @@ function associateJoinButtons() {
  * @param sessionid
  */
 function joinSession(sessionid) {
-    console.log('Joining session: ' + sessionid + 'NOT YET IMPLEMENTED');
+
+    fetch('/api/sessions/' + sessionid + '/players/' + getUserName() + '?access_token=' + getAccessToken(), {
+        method: 'put',
+    })
+        .then(result => {
+            if (result.status == 401)
+                throw Error('Bad credentials');
+        })
+        .catch(error => logout());
 }
 
 /**
