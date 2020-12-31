@@ -33,7 +33,7 @@ function onSessionsChanged(sessions) {
     allSessions = sessions.sessions;
 
     // Disable / enable the "create new session" button.
-    updateCreateButtonStatus(isInSession(getUserName(), sessions.sessions));
+    updateCreateButtonStatus(isInAnySession(getUserName(), sessions.sessions));
 
     // Build the HTML table, based on the received session information.
     updateSessionsTable(sessions.sessions);
@@ -63,10 +63,10 @@ function updateSessionsTable(sessions) {
         '</tr>'
     ).appendTo('#sessiontable');
 
-    let userActiveInASession = isInSession(getUserName(), sessions);
+    let userActiveInASession = isInAnySession(getUserName(), sessions);
 
     // iterate over players, print all info per player, and a remove button
-    $.each(sessions, function (key, session) {  // ToDo: fix for updated sessions structure.
+    $.each(sessions, function (key, session) {
         console.log(key + " - " + session);
         $('<tr>' +
             '<td>' + session.gameParameters.name + '</td>' +
@@ -101,37 +101,50 @@ function updateSessionsTable(sessions) {
  */
 function buildActionButtons(sessionkey, player, session, active) {
 
-    // if not yet involved to any session -> ordinary join button
-    if (!active)
-        return '<button class="btn btn-outline-primary" type="button" id="join-' + sessionkey + '">Join</button>\n';
+    // If the session is already running, only "watch" and "play" are possible - depending on the player's affiliation
+    if (isRunningSession(session)) {
+        if (isInThisSession(player, session))
+            return '<button class="btn btn-outline-success" type="button" id="play-' + sessionkey + '">Play</button>\n';
+        else
+            return '<button class="btn btn-outline-success" type="button" id="play-' + sessionkey + '">Watch</button>\n';
+    }
 
-    // else (already involved to a session, but...)
-    else {
-        // ... not involved in this one -> deactivated join button
-        if (!session.players.includes(getUserName()))
+    // If the session is not yet launched it depends on "already in session, already creator, already full"
+    // If not yet involved
+    if (!isInThisSession(player, session)) {
+        // Join is only possible if the session is not yet full
+        if (isFull(session))
             return '<button class="btn btn-outline-primary disabled" type="button" id="join-' + sessionkey + '">Join</button>\n';
+        else
+            return '<button class="btn btn-outline-primary" type="button" id="join-' + sessionkey + '">Join</button>\n';
+    }
 
-        // ... involved to the session, and session already running. No nmatter if creator or not, add a "Play" button
-        // that only forwards to the game's landing page.
-        if(isRunningSession(session))
-            return '<button class="btn btn-outline-success" type="button" id="play-' + sessionkey + '">Play!</button>\n';
+    // If already in session it depends. Players can only leave the game. Creators can delete (and if ready) launch the
+    // session
+    if (isNonCreatorPlayer(player, session))
+        return '<button class="btn btn-outline-warning" type="button" id="leave-' + sessionkey + '">Leave</button>\n';
 
-        // ... involved in this one as ordinary player
-        if (isNonCreatorPlayer(getUserName(), session))
-            return '<button class="btn btn-outline-warning" type="button" id="leave-' + sessionkey + '">Leave</button>\n';
-
-        // ... involved in this one as creator -> delete button, launch button (act / deact depending on player-amount)
+    // Game can only be launched if minimum amount players present
+    else {
         return '<button class="btn btn-outline-danger" style="margin-right: 5px" type="button" id="delete-' + sessionkey + '">Delete</button>\n' +
             '<button class="btn btn-outline-primary ' + buildDisabledLaunchTag(session) + '" type="button" id="launch-' + sessionkey + '">Launch</button>';
     }
+}
+
+function isInThisSession(player, session)
+{
+    return session.players.includes(player);
+}
+
+function isFull(session) {
+    return session.players.length == session.gameParameters.maxSessionPlayers;
 }
 
 /**
  * Helper function to determine whether a provided session is already running.
  * @param session
  */
-function isRunningSession(session)
-{
+function isRunningSession(session) {
     return session.launched === true;
 }
 
@@ -222,7 +235,7 @@ function startSession() {
  * @param playername
  * @param sessions
  */
-function isInSession(playername, sessions) {
+function isInAnySession(playername, sessions) {
     let inSession = false;
 
     // mark inSession true if player appears in at least one session
@@ -239,14 +252,14 @@ function isInSession(playername, sessions) {
 function updateCreateButtonStatus(status) {
     let startButton = $('#start-session-button');
 
-    if (!status) {
+    // if (!status) {
         startButton.removeClass('disabled');
         startButton.off(); // avoid double registrations.
         startButton.on('click', startSession);
-    } else {
-        startButton.addClass('disabled');
-        startButton.off();
-    }
+    // } else {
+    //     startButton.addClass('disabled');
+    //     startButton.off();
+    // }
 }
 
 /**
