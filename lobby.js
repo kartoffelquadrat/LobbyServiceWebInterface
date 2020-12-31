@@ -43,6 +43,7 @@ function onSessionsChanged(sessions) {
     associateLeaveButtons();
     associateDeleteButtons();
     associateLaunchButtons();
+    associatePlayButtons();
 }
 
 /**
@@ -88,8 +89,9 @@ function updateSessionsTable(sessions) {
  * Prepares HTML code for the buttons section of a session row.
  * If the player is active in at least on session (creator or player), all join buttons are deactivated. If the session
  * matches one where the player is creator, "join is replaced by "Delete" and "Launch", where the latter is only active
- * if the required amount of players is present. If the user is just a player participant of the session, "join" is
- * replaced by "Leave".
+ * if the required amount of players is present. In case the session is already running leave / launch are replaced by
+ * a "Play" button that redirects to the game's landing page. If the user is just a player participant of the session,
+ * "join" is replaced by "Leave".
  *
  * @param sessionkey as id of the session for which the buttons are generated
  * @param player as the name of the currently logged in player
@@ -109,7 +111,12 @@ function buildActionButtons(sessionkey, player, session, active) {
         if (!session.players.includes(getUserName()))
             return '<button class="btn btn-outline-primary disabled" type="button" id="join-' + sessionkey + '">Join</button>\n';
 
-        // ... involved in this one as ordinary player -> leave button
+        // ... involved to the session, and session already running. No nmatter if creator or not, add a "Play" button
+        // that only forwards to the game's landing page.
+        if(isRunningSession(session))
+            return '<button class="btn btn-outline-success" type="button" id="play-' + sessionkey + '">Play!</button>\n';
+
+        // ... involved in this one as ordinary player
         if (isNonCreatorPlayer(getUserName(), session))
             return '<button class="btn btn-outline-warning" type="button" id="leave-' + sessionkey + '">Leave</button>\n';
 
@@ -117,6 +124,15 @@ function buildActionButtons(sessionkey, player, session, active) {
         return '<button class="btn btn-outline-danger" style="margin-right: 5px" type="button" id="delete-' + sessionkey + '">Delete</button>\n' +
             '<button class="btn btn-outline-primary ' + buildDisabledLaunchTag(session) + '" type="button" id="launch-' + sessionkey + '">Launch</button>';
     }
+}
+
+/**
+ * Helper function to determine whether a provided session is already running.
+ * @param session
+ */
+function isRunningSession(session)
+{
+    return session.launched === true;
 }
 
 /**
@@ -333,6 +349,8 @@ function associateLaunchButtons() {
  * Sends API request to mark a session as launched
  */
 function launchSession(sessionid) {
+
+    // Sending this query to the LS will implicitly cause a session creation on game-service side issued by the LS.
     fetch('/api/sessions/' + sessionid + '?access_token=' + getAccessToken(), {
         method: 'post',
     })
@@ -341,7 +359,7 @@ function launchSession(sessionid) {
                 throw Error('Bad credentials!');
             if (result.status == 400)
                 throw Error('Bad request! UI out of sync?');
-            forwardToSessionLanding(sessionid);
+            //forwardToSessionLanding(sessionid);
         })
         .catch(error => {
             if (error.message.includes('credentials'))
@@ -359,11 +377,24 @@ function forwardToSessionLanding(sessionId) {
     //let t1 = allSessions.sessionId;
     //let landingLocation = allSessions.get(sessionId);//.gameParameters.location;
     $.each(allSessions, function (key, session) {  // ToDo: fix for updated sessions structure.
-        if(key === sessionId)
-        {
-            let landingLocation = session.gameParameters.location;
+        if (key === sessionId) {
+            // Note: Landing URL does not contain the access-token. Game-service can read token from cookie.
+            let landingLocation = session.gameParameters.location + '/webui/games/' + sessionId;
             console.log('Forwarding to external game session: ' + landingLocation);
             window.location.href = landingLocation;
         }
+    });
+}
+
+/**
+ * Assigns custom redirect page function to all "Play!" buttons.
+ */
+function associatePlayButtons(sessionId) {
+    let playButtons = $('[id^=play-]');
+    $.each(playButtons, function (index, playButton) {
+        let sessionId = playButton.id.substring(5);
+        $(playButton).on('click', function (event) {
+            forwardToSessionLanding(sessionId);
+        });
     });
 }
