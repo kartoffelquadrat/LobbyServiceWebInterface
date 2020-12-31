@@ -18,9 +18,18 @@ function populateSessionOptions() {
     fetch("/api/gameservices")
         .then(result => result.json())
         .then(options => {    // add each of retrieved "options" to form element with id "boardgameoptions"
+
+            // Add entries to drop down menu
             $.each(options, function (i, item) {
                 $('<option>' + item + '</option>').appendTo('#boardgameoptions');
             })
+
+            // Enable "create" button, if options carries at least one entry
+            if (options.length > 0) {
+                let startButton = $('#start-session-button');
+                startButton.removeClass('disabled');
+                startButton.on('click', startSession);
+            }
         });
 }
 
@@ -31,9 +40,6 @@ function populateSessionOptions() {
 function onSessionsChanged(sessions) {
 
     allSessions = sessions.sessions;
-
-    // Disable / enable the "create new session" button.
-    updateCreateButtonStatus(isInAnySession(getUserName(), sessions.sessions));
 
     // Build the HTML table, based on the received session information.
     updateSessionsTable(sessions.sessions);
@@ -131,8 +137,7 @@ function buildActionButtons(sessionkey, player, session, active) {
     }
 }
 
-function isInThisSession(player, session)
-{
+function isInThisSession(player, session) {
     return session.players.includes(player);
 }
 
@@ -243,23 +248,6 @@ function isInAnySession(playername, sessions) {
         inSession = inSession || session.players.includes(getUserName());
     });
     return inSession;
-}
-
-/**
- * Helper function to set the enabled disabled status of the start button (that allows creation of new sessions).
- * Button is set to enabled if false (player is not in a session), disabled if true (player is in a session).
- */
-function updateCreateButtonStatus(status) {
-    let startButton = $('#start-session-button');
-
-    // if (!status) {
-        startButton.removeClass('disabled');
-        startButton.off(); // avoid double registrations.
-        startButton.on('click', startSession);
-    // } else {
-    //     startButton.addClass('disabled');
-    //     startButton.off();
-    // }
 }
 
 /**
@@ -389,7 +377,7 @@ function launchSession(sessionid) {
 function forwardToSessionLanding(sessionId) {
     //let t1 = allSessions.sessionId;
     //let landingLocation = allSessions.get(sessionId);//.gameParameters.location;
-    $.each(allSessions, function (key, session) {  // ToDo: fix for updated sessions structure.
+    $.each(allSessions, function (key, session) {
         if (key === sessionId) {
             // Note: Landing URL does not contain the access-token. Game-service can read token from cookie.
             let landingLocation = session.gameParameters.location + '/webui/games/' + sessionId;
