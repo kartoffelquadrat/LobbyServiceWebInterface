@@ -44,7 +44,7 @@ function login() {
 
     // Lobby Service authentication meta-parameters and HTTP method
     const init = {
-        body: "grant_type=password&username="+username+"&password="+password,
+        body: "grant_type=password&username=" + username + "&password=" + password.replace(/\+/g, "%2B"), // Note: plus escaping required here since body follows URL param syntax and is parsed like an URL string on server side (see header parameter "urlencoded").
         headers: {
             Authorization: "Basic YmdwLWNsaWVudC1uYW1lOmJncC1jbGllbnQtcHc=", // echo -n "bgp-client-name:bgp-client-pw" | base64
             "Content-Type": "application/x-www-form-urlencoded"
@@ -76,14 +76,13 @@ function login() {
  * For admins, this is eht user management panel
  * For players this is the lobby
  */
-function forwardToLanding()
-{
+function forwardToLanding() {
     // Determine whether logged in user is admin or player
-    fetch('/oauth/role?access_token='+getAccessToken())
+    fetch('/oauth/role?access_token=' + getAccessToken())
         .then(result => result.json())
         .then(json => {
             // Redirect players to session panel, admins to user management panel
-            if( json[0].authority === 'ROLE_PLAYER')
+            if (json[0].authority === 'ROLE_PLAYER')
                 window.location.href = "/lobby.html";
             else
                 window.location.href = "/admin.html";
