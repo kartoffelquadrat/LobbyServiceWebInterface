@@ -379,8 +379,13 @@ function forwardToSessionLanding(sessionId) {
     //let landingLocation = allSessions.get(sessionId);//.gameParameters.location;
     $.each(allSessions, function (key, session) {
         if (key === sessionId) {
-            // Note: Landing URL does not contain the access-token. Game-service can read token from cookie.
-            let landingLocation = session.gameParameters.location + '/webui/games/' + sessionId;
+
+            // TODO: (ONCE LS conceals internal service locations)
+            // Note: the location provided within the gameParameters property is the internal service location (possibly a docker id that the client can not resolved).
+            // On the long run the LS will be hidden behind an API gateway, but for now the solution is to construct the external service URL from the current location + the gameservices port+ access URL
+            let serviceInternalLocation = session.gameParameters.location + '/webui/games/' + sessionId; // Note: no token in URL required - is stored within cookie
+            let serviceRelativeLocation =serviceInternalLocation.split(':')[1];
+            let landingLocation = window.location.split(':')[0] + serviceRelativeLocation;
             console.log('Forwarding to external game session: ' + landingLocation);
             window.location.href = landingLocation;
         }
