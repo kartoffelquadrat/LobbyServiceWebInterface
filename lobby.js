@@ -384,8 +384,8 @@ function forwardToSessionLanding(sessionId) {
             // Note: the location provided within the gameParameters property is the internal service location (possibly a docker id that the client can not resolved).
             // On the long run the LS will be hidden behind an API gateway, but for now the solution is to construct the external service URL from the current location + the gameservices port+ access URL
             let serviceInternalLocation = session.gameParameters.location + '/webui/games/' + sessionId; // Note: no token in URL required - is stored within cookie
-            let serviceRelativeLocation =serviceInternalLocation.split(':')[1];
-            let landingLocation = window.location.href.split(':')[0] + serviceRelativeLocation;
+            let serviceRelativeLocation =serviceInternalLocation.split(':')[2];
+            let landingLocation = "http:" + window.location.href.split(':')[1] +":"+ serviceRelativeLocation;
             console.log('Forwarding to external game session: ' + landingLocation);
             window.location.href = landingLocation;
         }
