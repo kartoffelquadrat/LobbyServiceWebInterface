@@ -53,7 +53,7 @@ function login() {
     };
 
     // Actually retrieves tokens from API. On success stores them in session cookie and redirects to main menu. On failure displays an alert an reloads the page.
-    fetch('/oauth/token', init)
+    fetch(getContextPath() + '/oauth/token', init)
         .then(result => result.json())  // returns a new promise, containing the parsed response (Even in case of bad credentials, a parse-able json is returned. no error handling needed here.)
         .then(json => {
             // If the LS rejected the credentials:
@@ -78,7 +78,7 @@ function login() {
  */
 function forwardToLanding() {
     // Determine whether logged in user is admin or player
-    fetch('/oauth/role?access_token=' + getAccessToken())
+    fetch(getContextPath() + '/oauth/role?access_token=' + getAccessToken())
         .then(result => result.json())
         .then(json => {
             // Redirect players to session panel, admins to user management panel
