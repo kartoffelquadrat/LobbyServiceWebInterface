@@ -125,7 +125,7 @@ function isLoginOk() {
  */
 function anonymousIntercept() {
     if (!isLoginOk())
-        window.location.replace("/");
+        window.location.replace(getContextPath()+"/");
 }
 
 function getUserName() {
