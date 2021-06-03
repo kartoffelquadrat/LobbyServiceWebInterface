@@ -124,8 +124,10 @@ function isLoginOk() {
  * Redirects all non-authenticated users to the login page.
  */
 function anonymousIntercept() {
-    if (!isLoginOk())
-        window.location.replace(getContextPath()+"/");
+    if (!isLoginOk()) {
+        let landingPage = getContextPath() + "/";
+        window.location.replace(landingPage);
+    }
 }
 
 function getUserName() {
