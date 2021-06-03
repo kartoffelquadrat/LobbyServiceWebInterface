@@ -144,7 +144,7 @@ function getRefreshToken() {
  * Deletes the tokens from the cookie, keeps the username. Then reloads the page (forces redirect to login if protected page.).
  */
 function logout() {
-    document.cookie = "access-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path="+getContextPath()+"/;";
-    document.cookie = "refresh-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path="+getContextPath()+"/;";
+    document.cookie = "access-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path="+getContextPath()+";";
+    document.cookie = "refresh-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path="+getContextPath()+";";
     location.reload();
 }
