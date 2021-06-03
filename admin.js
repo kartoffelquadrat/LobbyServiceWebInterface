@@ -83,7 +83,7 @@ function createNewUser() {
     let registrationForm = parseAndClearRegistrationFields();
 
     //postToApi(registrationForm, "/accounts/", "");
-    fetch('/api/users/' + registrationForm.name + '?access_token=' + getAccessToken(), {
+    fetch(getContextPath() + '/api/users/' + registrationForm.name + '?access_token=' + getAccessToken(), {
         headers: {
             'Content-Type': 'application/json'
         },
@@ -119,7 +119,7 @@ function updateUserColour(user) {
     let postdata = {"colour": nextColour};
 
     // actually send request to API
-    fetch('/api/users/' + username + '/colour?access_token=' + getAccessToken(), {
+    fetch(getContextPath() + '/api/users/' + username + '/colour?access_token=' + getAccessToken(), {
         headers: {
             'Content-Type': 'application/json'
         },
@@ -155,7 +155,7 @@ function updateUserPassword(user) {
     let postdata = {"nextPassword": nextPassword, "oldPassword": "---"};
 
     // actually send request to API
-    fetch('/api/users/' + username + '/password?access_token=' + getAccessToken(), {
+    fetch(getContextPath() + '/api/users/' + username + '/password?access_token=' + getAccessToken(), {
         headers: {
             'Content-Type': 'application/json'
         },
@@ -180,7 +180,7 @@ function updateUserPassword(user) {
 function deleteUser(user) {
     console.log("Deleting user: " + user.data.id);
     // postToApi(null, "/accounts/" + user.data.id + "/", "");
-    fetch('/api/users/' + user.data.id + '?access_token=' + getAccessToken(), {
+    fetch(getContextPath() + '/api/users/' + user.data.id + '?access_token=' + getAccessToken(), {
         method: 'delete',
     })
         .then(reply => {
@@ -201,7 +201,7 @@ function deleteUser(user) {
 function updateDisplayedAccounts() {
 
     // retrieve the list of registered users from the API
-    fetch('/api/users?access_token=' + getAccessToken())
+    fetch(getContextPath() + '/api/users?access_token=' + getAccessToken())
         .then(result => result.json())
         .then(json => {
             if (json.error)

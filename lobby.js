@@ -15,7 +15,7 @@ function prepareLobbyPage() {
 function populateSessionOptions() {
 
     // retrieve list of all options from server
-    fetch("/api/gameservices")
+    fetch(getContextPath() + "/api/gameservices")
         .then(result => result.json())
         .then(options => {    // add each of retrieved "options" to form element with id "boardgameoptions"
 
@@ -221,7 +221,7 @@ function startSession() {
         "savegame": ""
     }
 
-    fetch('/api/sessions?access_token=' + getAccessToken(), {
+    fetch(getContextPath() + '/api/sessions?access_token=' + getAccessToken(), {
         headers: {
             'Content-Type': 'application/json'
         },
@@ -283,7 +283,7 @@ function associateDeleteButtons() {
  */
 function joinSession(sessionid) {
 
-    fetch('/api/sessions/' + sessionid + '/players/' + getUserName() + '?access_token=' + getAccessToken(), {
+    fetch(getContextPath() + '/api/sessions/' + sessionid + '/players/' + getUserName() + '?access_token=' + getAccessToken(), {
         method: 'put',
     })
         .then(result => {
@@ -294,7 +294,7 @@ function joinSession(sessionid) {
 }
 
 function deleteSession(sessionid) {
-    fetch('/api/sessions/' + sessionid + '?access_token=' + getAccessToken(), {
+    fetch(getContextPath() + '/api/sessions/' + sessionid + '?access_token=' + getAccessToken(), {
         method: 'delete',
     })
         .then(result => {
@@ -322,7 +322,7 @@ function associateLeaveButtons() {
  * @param sessionid as the id of the session in question
  */
 function leaveSession(sessionid) {
-    fetch('/api/sessions/' + sessionid + '/players/' + getUserName() + '?access_token=' + getAccessToken(), {
+    fetch(getContextPath() + '/api/sessions/' + sessionid + '/players/' + getUserName() + '?access_token=' + getAccessToken(), {
         method: 'delete',
     })
         .then(result => {
@@ -352,7 +352,7 @@ function associateLaunchButtons() {
 function launchSession(sessionid) {
 
     // Sending this query to the LS will implicitly cause a session creation on game-service side issued by the LS.
-    fetch('/api/sessions/' + sessionid + '?access_token=' + getAccessToken(), {
+    fetch(getContextPath() + '/api/sessions/' + sessionid + '?access_token=' + getAccessToken(), {
         method: 'post',
     })
         .then(result => {
@@ -381,7 +381,9 @@ function forwardToSessionLanding(sessionId) {
         if (key === sessionId) {
 
             // TODO: (ONCE LS conceals internal service locations)
-            // Note: the location provided within the gameParameters property is the internal service location (possibly a docker id that the client can not resolved).
+            // TODO: Set up API GW that rejects direct client side calls to game-service APIs.
+            // TODO: Fix redirect for HTTPS.
+            // Note: the location provided within the gameParameters property is the internal service location (possibly a docker id that the client can not resolve).
             // On the long run the LS will be hidden behind an API gateway, but for now the solution is to construct the external service URL from the current location + the gameservices port+ access URL
             let serviceInternalLocation = session.gameParameters.location + '/webui/games/' + sessionId; // Note: no token in URL required - is stored within cookie
             let serviceRelativeLocation =serviceInternalLocation.split(':')[2];

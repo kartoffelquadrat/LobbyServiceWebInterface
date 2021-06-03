@@ -3,7 +3,7 @@
  */
 
 function testApiOnline() {
-    fetch('/api/online')
+    fetch(getContextPath() + '/api/online')
         .then(response => {
             if(response.status != 200)
                 markOffline();

@@ -83,9 +83,9 @@ function forwardToLanding() {
         .then(json => {
             // Redirect players to session panel, admins to user management panel
             if (json[0].authority === 'ROLE_PLAYER')
-                window.location.href = "/lobby.html";
+                window.location.href = getContextPath() + "/lobby.html";
             else
-                window.location.href = "/admin.html";
+                window.location.href = getContextPath() + "/admin.html";
         })
 }
 
