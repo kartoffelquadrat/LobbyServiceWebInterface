@@ -213,7 +213,7 @@ function updateDisplayedAccounts() {
         })
         .catch(error => { // redirect to login in case the credentials were rejected.
             console.log(error);
-            location.replace('/');
+            location.replace(getContextPath() + '/');
         });
 }
 
