@@ -103,9 +103,9 @@ function persistLogin(username, access_token, refresh_token) {
     console.log("Username: " + username);
     console.log("Access Token: " + access_token);
     console.log("Refresh Token: " + refresh_token);
-    document.cookie = "user-name=" + username;
-    document.cookie = "access-token=" + access_token;
-    document.cookie = "refresh-token=" + refresh_token;
+    document.cookie = "path=/;user-name=" + username
+    document.cookie = "path=/;access-token=" + access_token;
+    document.cookie = "path=/;refresh-token=" + refresh_token;
 }
 
 /**
@@ -146,7 +146,7 @@ function getRefreshToken() {
  * Deletes the tokens from the cookie, keeps the username. Then reloads the page (forces redirect to login if protected page.).
  */
 function logout() {
-    document.cookie = "access-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path="+getContextPath()+";";
-    document.cookie = "refresh-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path="+getContextPath()+";";
+    document.cookie = "access-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+    document.cookie = "refresh-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
     window.location.replace(getContextPath()+"/");
 }
