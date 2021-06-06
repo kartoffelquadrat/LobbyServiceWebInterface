@@ -6,7 +6,7 @@ function prepareLobbyPage() {
     populateSessionOptions();
 
     // ARL-long poll on "available-sessions"-resource and update displayed table if something changed
-    observeResource('/api/sessions?hash=', onSessionsChanged, markOffline, "");
+    observeResource(getContextPath()+'/api/sessions?hash=', onSessionsChanged, markOffline, "");
 }
 
 /**
