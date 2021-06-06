@@ -380,14 +380,9 @@ function forwardToSessionLanding(sessionId) {
     $.each(allSessions, function (key, session) {
         if (key === sessionId) {
 
-            // TODO: (ONCE LS conceals internal service locations)
-            // TODO: Set up API GW that rejects direct client side calls to game-service APIs.
-            // TODO: Fix redirect for HTTPS.
             // Note: the location provided within the gameParameters property is the internal service location (possibly a docker id that the client can not resolve).
             // On the long run the LS will be hidden behind an API gateway, but for now the solution is to construct the external service URL from the current location + the gameservices port+ access URL
-            let serviceInternalLocation = session.gameParameters.location + '/webui/games/' + sessionId; // Note: no token in URL required - is stored within cookie
-            let serviceRelativeLocation =serviceInternalLocation.split(':')[2];
-            let landingLocation = "http:" + window.location.href.split(':')[1] +":"+ serviceRelativeLocation;
+            let landingLocation = session.gameParameters.location + '/webui/games/' + sessionId; // Note: no token in URL required - is stored within cookie
             console.log('Forwarding to external game session: ' + landingLocation);
             window.location.href = landingLocation;
         }
