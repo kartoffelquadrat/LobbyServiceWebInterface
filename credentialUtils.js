@@ -103,9 +103,9 @@ function persistLogin(username, access_token, refresh_token) {
     console.log("Username: " + username);
     console.log("Access Token: " + access_token);
     console.log("Refresh Token: " + refresh_token);
-    document.cookie = "path=/;user-name=" + username
-    document.cookie = "path=/;access-token=" + access_token;
-    document.cookie = "path=/;refresh-token=" + refresh_token;
+    document.cookie = "user-name=" + username + ";path=/";
+    document.cookie = "access-token=" + access_token + ";path=/";
+    document.cookie = "refresh-token=" + refresh_token + ";path=/";
 }
 
 /**
