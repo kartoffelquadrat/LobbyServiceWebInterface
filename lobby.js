@@ -375,16 +375,28 @@ function launchSession(sessionid) {
  * @param session
  */
 function forwardToSessionLanding(sessionId) {
-    //let t1 = allSessions.sessionId;
-    //let landingLocation = allSessions.get(sessionId);//.gameParameters.location;
+
+    // associate corresponding redirect functions to all play / observe buttons.
     $.each(allSessions, function (key, session) {
         if (key === sessionId) {
 
-            // Note: the location provided within the gameParameters property is the internal service location (possibly a docker id that the client can not resolve).
-            // On the long run the LS will be hidden behind an API gateway, but for now the solution is to construct the external service URL from the current location + the gameservices port+ access URL
-            let landingLocation = session.gameParameters.location + '/webui/games/' + sessionId; // Note: no token in URL required - is stored within cookie
-            console.log('Forwarding to external game session: ' + landingLocation);
-            window.location.href = landingLocation;
+            // Note: the location provided within the gameParameters property CAN be a docker-intern locator (e.g. "lobby", "xox") rather than a location resolvable by the browser.
+            // Currently the BGP assumes all services run on the same location, therfore a partial address preservation (as implemented below) sidesteps this problem.
+            // On the long run the registration of services with an enabled "web" flag, contain an additional landing page locator (resolvable by a browser, outside the virtual docker network)
+
+            // step 1: preserve current server location as prefix (location+':')
+            // Note: protocol information (http/https) is not provided - auto resolved by browser.
+            let serverLocation = window.location.href.split(':')[1] +":";
+
+            // step 2: build the relative location (will be used as suffix) based on the gameservice registry information. (port + landing resource)
+            let serviceInternalLocation = session.gameParameters.location + '/webui/games/' + sessionId; // Note: no token in URL required - is stored within cookie
+            let serviceRelativeLocation =serviceInternalLocation.split(':')[2];
+
+            // Construct the resulting landing url, that is resolvable by browser.
+            let landinglocation = serverLocation + serviceRelativeLocation;
+
+            console.log('Forwarding to external game session: ' + landinglocation);
+            window.location.href = landinglocation;
         }
     });
 }
