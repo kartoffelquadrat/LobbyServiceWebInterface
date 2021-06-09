@@ -384,16 +384,23 @@ function forwardToSessionLanding(sessionId) {
             // Currently the BGP assumes all services run on the same location, therfore a partial address preservation (as implemented below) sidesteps this problem.
             // On the long run the registration of services with an enabled "web" flag, contain an additional landing page locator (resolvable by a browser, outside the virtual docker network)
 
+            // step 0: preserve protocol
+            let protocol = window.location.href.split(':')[0] +":";
+
             // step 1: preserve current server location as prefix (location+':')
             // Note: protocol information (http/https) is not provided - auto resolved by browser.
+            // Algo: if there are two ':' in string (port provided) then split at second ':'. otherwise split at first occurence of '/' after the ':'. (is equal to third occurence of '/')
             let serverLocation = window.location.href.split(':')[1] +":";
+            if((( window.location.href.match(/:/g) || []).length) === 1)
+                // if the original URL did not contain a port. shorten until the third '/'
+                serverLocation = "//" + serverLocation.split('/')[2] +":";
 
             // step 2: build the relative location (will be used as suffix) based on the gameservice registry information. (port + landing resource)
             let serviceInternalLocation = session.gameParameters.location + '/webui/games/' + sessionId; // Note: no token in URL required - is stored within cookie
-            let serviceRelativeLocation =serviceInternalLocation.split(':')[2];
+            let serviceRelativeLocation = serviceInternalLocation.split(':')[2];
 
             // Construct the resulting landing url, that is resolvable by browser.
-            let landinglocation = serverLocation + serviceRelativeLocation;
+            let landinglocation = protocol + serverLocation + serviceRelativeLocation;
 
             console.log('Forwarding to external game session: ' + landinglocation);
             window.location.href = landinglocation;
