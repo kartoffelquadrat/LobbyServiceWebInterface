@@ -91,9 +91,10 @@ function login() {
     // reload if bad credentials.
 }
 
-function computeExpiryMoment(remainingMilliSeconds) {
+function computeExpiryMoment(remainingSeconds) {
     // Add remaining millisecond to current moment in milliseconds since 1970/01/01.
-    return new Date().getTime() + remainingMilliSeconds;
+    let expiry = new Date().getTime() + remainingSeconds*1000;
+    return expiry;
 }
 
 /**
@@ -185,7 +186,7 @@ function getAccessTokenExpiryMoment() {
  */
 function getRemainingMilliSecondsBeforeAccessTokenExpiry() {
 
-    return getAccessTokenExpiryMoment() - (new Date().getTime()) - 5*1000;
+    return getAccessTokenExpiryMoment() - new Date().getTime() - 5 * 1000;
 }
 
 /**
@@ -202,6 +203,8 @@ function logout() {
 /**
  * Invoke this function on every page load (except login page). If an access token is present, it will be renewed
  * shortly before its expiry, using the corresponding refresh token.
+ * Once called, it is not necessary to interrupt this method. A page relocate implicitly kills potentially pending
+ * sleeps promises.
  */
 function timedTokenRenew() {
 
@@ -212,14 +215,15 @@ function timedTokenRenew() {
     }
 
     let timeUntilRenew = getRemainingMilliSecondsBeforeAccessTokenExpiry();
-    sleep(timeUntilRenew).then(useRefreshToken);
+    sleep(timeUntilRenew).then(renewTokens);
 }
 
 /**
  * Helper function to renew the access token, using the current refresh token.
  */
-function useRefreshToken()
-{
+function renewTokens() {
+    console.log("Current access token will expire within the next couple of seconds. Attempting to use refresh token to update.")
+
     // Get new token pair, using refresh token
     let refreshToken = getRefreshToken();
     // Lobby Service authentication meta-parameters and HTTP method
@@ -250,7 +254,10 @@ function useRefreshToken()
             else {
                 console.log("Successfully renewed tokens using refresh token.");
                 let expiryMoment = computeExpiryMoment(json.expires_in);
-                persistLogin(username, json.access_token, json.refresh_token, expiryMoment);
+                persistLogin(getUserName(), json.access_token, json.refresh_token, expiryMoment);
+
+                // recursively enable following token renewal based on renewed tokens
+                timedTokenRenew();
             }
         })
 }
@@ -258,6 +265,6 @@ function useRefreshToken()
 /**
  * Helper function to get sleep functionality. See: https://stackoverflow.com/a/951057
  */
-function sleep (time) {
+function sleep(time) {
     return new Promise((resolve) => setTimeout(resolve, time));
 }
