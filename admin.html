@@ -18,7 +18,7 @@
 </head>
 
 <!--"onload"-script removes API unreachable warning if backend was successfully tested-->
-<body onload="anonymousIntercept();setupNavbar();testApiOnline();registerButtonHandlers();updateDisplayedAccounts();">
+<body onload="anonymousIntercept();renewTokenBeforeExpiry();setupNavbar();testApiOnline();registerButtonHandlers();updateDisplayedAccounts();">
 <div id=RowDivWithBackground class="container bg-white fill">
 
     <!--dynamic load would be better than static copies over different html files. But it causes issues with the handler mapping (order messed up / unreliable.)-->
