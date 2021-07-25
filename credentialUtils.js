@@ -31,7 +31,8 @@ function registerLoginHandler() {
 }
 
 /**
- * Retrieves an OAuth2 token pair using the provided credentials. On success the token is stored in a cookie and the user is redirected to the main menu.
+ * Retrieves an OAuth2 token pair using the provided credentials. On success the token is stored in a cookie and the
+ * user is redirected to the main menu.
  */
 function login() {
 
@@ -44,17 +45,35 @@ function login() {
 
     // Lobby Service authentication meta-parameters and HTTP method
     const init = {
-        body: "grant_type=password&username=" + username + "&password=" + password.replace(/\+/g, "%2B"), // Note: plus escaping required here since body follows URL param syntax and is parsed like an URL string on server side (see header parameter "urlencoded").
+        body: "grant_type=password&username=" + username + "&password=" + password.replace(/\+/g, "%2B"), // Note: plus
+                                                                                                          // escaping
+                                                                                                          // required
+                                                                                                          // here since
+                                                                                                          // body
+                                                                                                          // follows
+                                                                                                          // URL param
+                                                                                                          // syntax and
+                                                                                                          // is parsed
+                                                                                                          // like an
+                                                                                                          // URL string
+                                                                                                          // on server
+                                                                                                          // side (see
+                                                                                                          // header
+                                                                                                          // parameter
+                                                                                                          // "urlencoded").
         headers: {
-            Authorization: "Basic YmdwLWNsaWVudC1uYW1lOmJncC1jbGllbnQtcHc=", // echo -n "bgp-client-name:bgp-client-pw" | base64
+            Authorization: "Basic YmdwLWNsaWVudC1uYW1lOmJncC1jbGllbnQtcHc=", // echo -n "bgp-client-name:bgp-client-pw"
+                                                                             // | base64
             "Content-Type": "application/x-www-form-urlencoded"
         },
         method: "POST"
     };
 
-    // Actually retrieves tokens from API. On success stores them in session cookie and redirects to main menu. On failure displays an alert an reloads the page.
+    // Actually retrieves tokens from API. On success stores them in session cookie and redirects to main menu. On
+    // failure displays an alert an reloads the page.
     fetch(getContextPath() + '/oauth/token', init)
-        .then(result => result.json())  // returns a new promise, containing the parsed response (Even in case of bad credentials, a parse-able json is returned. no error handling needed here.)
+        .then(result => result.json())  // returns a new promise, containing the parsed response (Even in case of bad
+        // credentials, a parse-able json is returned. no error handling needed here.)
         .then(json => {
             // If the LS rejected the credentials:
             if (json.error) {
@@ -68,11 +87,11 @@ function login() {
                 forwardToLanding();
             }
         })
-    // Apparently not possible to force DOM update from promise finally. Therefore redirect to same page and fore reload if bad credentials.
+    // Apparently not possible to force DOM update from promise finally. Therefore redirect to same page and fore
+    // reload if bad credentials.
 }
 
-function computeExpiryMoment(remainingMilliSeconds)
-{
+function computeExpiryMoment(remainingMilliSeconds) {
     // Add remaining millisecond to current moment in milliseconds since 1970/01/01.
     return new Date().getTime() + remainingMilliSeconds;
 }
@@ -109,7 +128,7 @@ function persistLogin(username, access_token, refresh_token, access_token_expiry
     console.log("Username: " + username);
     console.log("Access Token: " + access_token);
     console.log("Refresh Token: " + refresh_token);
-    console.log("Access Token Expiry Moment: "+access_token_expiry_moment);
+    console.log("Access Token Expiry Moment: " + access_token_expiry_moment);
     document.cookie = "user-name=" + username + ";path=/";
     document.cookie = "access-token=" + access_token + ";path=/";
     document.cookie = "refresh-token=" + refresh_token + ";path=/";
@@ -153,18 +172,92 @@ function getRefreshToken() {
 }
 
 /**
- * Returns the system time at which the access token will expire. (Not to be confused with the remaining time until its expiry)
+ * Returns the system time at which the access token will expire. (Not to be confused with the remaining time until its
+ * expiry)
  */
 function getAccessTokenExpiryMoment() {
     return readCookie('access-token-expiry-moment');
 }
 
 /**
- * Deletes the tokens from the cookie, keeps the username. Then reloads the page (forces redirect to login if protected page.).
+ * Returns (based on the expiry moment) the amount of millisecond remaining until the access token expiry (including a
+ * 5 second buffer period).
+ */
+function getRemainingMilliSecondsBeforeAccessTokenExpiry() {
+
+    return getAccessTokenExpiryMoment() - (new Date().getTime()) - 5*1000;
+}
+
+/**
+ * Deletes the tokens from the cookie, keeps the username. Then reloads the page (forces redirect to login if protected
+ * page.).
  */
 function logout() {
     document.cookie = "access-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
     document.cookie = "refresh-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
     document.cookie = "access-token-expiry-moment=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
-    window.location.replace(getContextPath()+"/");
+    window.location.replace(getContextPath() + "/");
+}
+
+/**
+ * Invoke this function on every page load (except login page). If an access token is present, it will be renewed
+ * shortly before its expiry, using the corresponding refresh token.
+ */
+function timedTokenRenew() {
+
+    // If no access token defined, print a warning and stop this function.
+    if (!getAccessToken()) {
+        console.error("Impossible to invoke delayed token renewal when no token is present!");
+        return;
+    }
+
+    let timeUntilRenew = getRemainingMilliSecondsBeforeAccessTokenExpiry();
+    sleep(timeUntilRenew).then(useRefreshToken);
+}
+
+/**
+ * Helper function to renew the access token, using the current refresh token.
+ */
+function useRefreshToken()
+{
+    // Get new token pair, using refresh token
+    let refreshToken = getRefreshToken();
+    // Lobby Service authentication meta-parameters and HTTP method
+    // See original login function for body payload details.
+    const init = {
+        body: "grant_type=refresh_token&refresh_token=" + refreshToken.replace(/\+/g, "%2B"),
+        headers: {
+            Authorization: "Basic YmdwLWNsaWVudC1uYW1lOmJncC1jbGllbnQtcHc=",
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        method: "POST"
+    };
+
+    // Actually retrieves tokens from API. On success stores them in session cookie and redirects to main menu. On
+    // failure displays an alert an reloads the page.
+    // TODO: do not use context path here. Use the path persisted in cookie on original login.
+    fetch(getContextPath() + '/oauth/token', init)
+        .then(result => result.json())  // returns a new promise, containing the parsed response (Even in case of bad
+        // credentials, a parse-able json is returned. no error handling needed here.)
+        .then(json => {
+            // If the LS rejected the credentials:
+            if (json.error) {
+                alert(json.error_description);
+                logout();
+                location.reload();
+            }
+            // Else, if the credentials were accepted (token in JSON reply)
+            else {
+                console.log("Successfully renewed tokens using refresh token.");
+                let expiryMoment = computeExpiryMoment(json.expires_in);
+                persistLogin(username, json.access_token, json.refresh_token, expiryMoment);
+            }
+        })
+}
+
+/**
+ * Helper function to get sleep functionality. See: https://stackoverflow.com/a/951057
+ */
+function sleep (time) {
+    return new Promise((resolve) => setTimeout(resolve, time));
 }
