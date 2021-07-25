@@ -63,12 +63,18 @@ function login() {
             }
             // Else, if the credentials were accepted (token in JSON reply)
             else {
-                persistLogin(username, json.access_token, json.refresh_token);
+                let expiryMoment = computeExpiryMoment(json.expires_in);
+                persistLogin(username, json.access_token, json.refresh_token, expiryMoment);
                 forwardToLanding();
             }
         })
     // Apparently not possible to force DOM update from promise finally. Therefore redirect to same page and fore reload if bad credentials.
+}
 
+function computeExpiryMoment(remainingMilliSeconds)
+{
+    // Add remaining millisecond to current moment in milliseconds since 1970/01/01.
+    return new Date().getTime() + remainingMilliSeconds;
 }
 
 /**
@@ -93,7 +99,7 @@ function forwardToLanding() {
 /**
  * Saves the access and refresh token in a session cookie.
  */
-function persistLogin(username, access_token, refresh_token) {
+function persistLogin(username, access_token, refresh_token, access_token_expiry_moment) {
 
     // escape occurrences of '+' in tokens by '%2B', so they can be safely used as URL params from here on.
     access_token = access_token.replace(/\+/g, "%2B");
@@ -103,9 +109,11 @@ function persistLogin(username, access_token, refresh_token) {
     console.log("Username: " + username);
     console.log("Access Token: " + access_token);
     console.log("Refresh Token: " + refresh_token);
+    console.log("Access Token Expiry Moment: "+access_token_expiry_moment);
     document.cookie = "user-name=" + username + ";path=/";
     document.cookie = "access-token=" + access_token + ";path=/";
     document.cookie = "refresh-token=" + refresh_token + ";path=/";
+    document.cookie = "access-token-expiry-moment=" + access_token_expiry_moment + ";path=/";
 }
 
 /**
@@ -115,6 +123,8 @@ function isLoginOk() {
     let username = readCookie('user-name');
     let access_token = readCookie('access-token');
     let refresh_token = readCookie('refresh-token');
+
+    // TODO: return false if access token already expired.
 
     // evaluates to true if all strings properly set in cookie
     return username && access_token && refresh_token;
@@ -140,6 +150,13 @@ function getAccessToken() {
 
 function getRefreshToken() {
     return readCookie('refresh-token');
+}
+
+/**
+ * Returns the system time at which the access token will expire. (Not to be confused with the remaining time until its expiry)
+ */
+function getAccessTokenExpiryMoment() {
+    return readCookie('access-token-expiry-moment');
 }
 
 /**
