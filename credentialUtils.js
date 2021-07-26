@@ -82,8 +82,13 @@ function login() {
             }
             // Else, if the credentials were accepted (token in JSON reply)
             else {
+                // Compute exact moment (absolute) when token will expire
                 let expiryMoment = computeExpiryMoment(json.expires_in);
-                persistLogin(username, json.access_token, json.refresh_token, expiryMoment);
+
+                // save location used for login (current page) so this oauth2 endpoint can be contacted, even in case of a forward to other domains / ports.
+                let authority_context = window.location.href + "oauth/token";
+
+                persistLogin(username, json.access_token, json.refresh_token, expiryMoment, authority_context);
                 forwardToLanding();
             }
         })
@@ -119,7 +124,7 @@ function forwardToLanding() {
 /**
  * Saves the access and refresh token in a session cookie.
  */
-function persistLogin(username, access_token, refresh_token, access_token_expiry_moment) {
+function persistLogin(username, access_token, refresh_token, access_token_expiry_moment, authority_context) {
 
     // escape occurrences of '+' in tokens by '%2B', so they can be safely used as URL params from here on.
     access_token = access_token.replace(/\+/g, "%2B");
@@ -130,10 +135,12 @@ function persistLogin(username, access_token, refresh_token, access_token_expiry
     console.log("Access Token: " + access_token);
     console.log("Refresh Token: " + refresh_token);
     console.log("Access Token Expiry Moment: " + access_token_expiry_moment);
+    console.log("OAuth2 Service Entity Context: "+authority_context);
     document.cookie = "user-name=" + username + ";path=/";
     document.cookie = "access-token=" + access_token + ";path=/";
     document.cookie = "refresh-token=" + refresh_token + ";path=/";
     document.cookie = "access-token-expiry-moment=" + access_token_expiry_moment + ";path=/";
+    document.cookie = "oauth2-context="+authority_context+";path=/";
 }
 
 /**
@@ -178,6 +185,14 @@ function getRefreshToken() {
  */
 function getAccessTokenExpiryMoment() {
     return readCookie('access-token-expiry-moment');
+}
+
+/**
+ * Returns the system time at which the access token will expire. (Not to be confused with the remaining time until its
+ * expiry)
+ */
+function getOauthContext() {
+    return readCookie('oauth2-context');
 }
 
 /**
@@ -240,7 +255,8 @@ function renewTokens() {
     // Actually retrieves tokens from API. On success stores them in session cookie and redirects to main menu. On
     // failure displays an alert an reloads the page.
     // TODO: do not use context path here. Use the path persisted in cookie on original login.
-    fetch(getContextPath() + '/oauth/token', init)
+    let oauth_context = getOauthContext();
+    fetch(oauth_context, init)
         .then(result => result.json())  // returns a new promise, containing the parsed response (Even in case of bad
         // credentials, a parse-able json is returned. no error handling needed here.)
         .then(json => {
@@ -254,7 +270,7 @@ function renewTokens() {
             else {
                 console.log("Successfully renewed tokens using refresh token.");
                 let expiryMoment = computeExpiryMoment(json.expires_in);
-                persistLogin(getUserName(), json.access_token, json.refresh_token, expiryMoment);
+                persistLogin(getUserName(), json.access_token, json.refresh_token, expiryMoment, oauth_context);
 
                 // recursively enable following token renewal based on renewed tokens
                 timedTokenRenew();
