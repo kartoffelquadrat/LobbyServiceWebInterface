@@ -385,9 +385,7 @@ function forwardToSessionLanding(sessionId) {
             // On the long run the registration of services with an enabled "web" flag, contain an additional landing page locator (resolvable by a browser, outside the virtual docker network)
 
             // step 0: preserve protocol
-            //TODO: Verify dynamic protocol change does not break docker configuration.
-            //let protocol = window.location.href.split(':')[0] +":";
-            let protocol = serverLocation.split(':')[0]+":";
+            let protocol = window.location.href.split(':')[0] +":";
 
             // step 1: preserve current server location as prefix (location+':') (without the http://|https:// prefix)
             // Note: protocol information (http/https) is not provided - auto resolved by browser.
