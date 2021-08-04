@@ -303,33 +303,51 @@ function fetchAndDisplaySingleGameServiceDetails(service) {
                 // add a table entry with the retrieved details
                 console.log("Service Detail:" + service_details);
                 $('<tbody><tr>' +
-
                     // Service id-name
                     '<td>' + service_details.name + '</td>' +
-
                     // Service display-name
                     '<td>\'' + service_details.displayName + '\'</td>' +
-
                     // Service location
                     '<td><a href="' + service_details.location + '">'+service_details.location+'</a></td>' +
-
                     // Service player range
                     '<td> [' + service_details.minSessionPlayers + ' - ' + service_details.maxSessionPlayers +']</td>' +
-
                     // a button to force unregister the service
                     '<td>        ' +
                     '<div class="input-group-append">\n' +
-                    '<button class="btn btn-outline-danger" type="button" id="remove-' + service_details.name + '">Force unregister</button>\n' +
+                    '<button class="btn btn-outline-danger" type="button" id="unregister-' + service_details.name + '">Force unregister</button>\n' +
                     '</div>' +
                     '</td>' +
                     '</tr></tbody>').appendTo('#servicetable');
+
+                // Add handler for delete button
+                $('#unregister-' + service_details.name).on('click', function unregisterClojure() {unregisterService(service_details.name);});
             }
         })
         .catch(error => { // redirect to login in case the credentials were rejected.
             console.log(error);
             location.replace(getContextPath() + '/');
         });
+}
 
+/**
+ * Sends a request to api to unregister an existing game service by name (id)
+ * @param name as the unique name of the service, as has been specified upon registration.
+ */
+function unregisterService(service_name) {
+    console.log("Un-registering game service: " + service_name);
+    fetch(getContextPath() + '/api/gameservices/' + service_name + '?access_token=' + getAccessToken(), {
+        method: 'delete',
+    })
+        .then(reply => {
+            if (reply.ok) {
+                // update list of displayed users
+                updateDisplayedGameServices();
+            }
+            else {
+                reply.text()
+                    .then(text => alert(text));
+            }
+        })
 }
 
 function fillServicesTable(gameServices) {
