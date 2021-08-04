@@ -6,7 +6,7 @@ function prepareLobbyPage() {
     populateSessionOptions();
 
     // ARL-long poll on "available-sessions"-resource and update displayed table if something changed
-    observeResource(getContextPath()+'/api/sessions?hash=', onSessionsChanged, markOffline, "");
+    observeResource(getContextPath() + '/api/sessions?hash=', onSessionsChanged, markOffline, "");
 }
 
 /**
@@ -21,7 +21,7 @@ function populateSessionOptions() {
 
             // Add entries to drop down menu
             $.each(options, function (i, item) {
-                $('<option>' + item + '</option>').appendTo('#boardgameoptions');
+                $('<option value="' + item.name + '">' + item.displayName + '</option>').appendTo('#boardgameoptions');
             })
 
             // Enable "create" button, if options carries at least one entry
@@ -75,7 +75,7 @@ function updateSessionsTable(sessions) {
     $.each(sessions, function (key, session) {
         console.log(key + " - " + session);
         $('<tr>' +
-            '<td>' + session.gameParameters.name + '</td>' +
+            '<td>' + session.gameParameters.displayName + '</td>' +
             '<td>' + capitalizeFirstLetter(session.creator) + '</td>' +
             '<td>' + getPlayersIndicatorString(session) + '</td>' +
             '<td>        ' +
@@ -209,7 +209,8 @@ function getPlayersIndicatorString(session) {
 }
 
 /**
- * triggered by "start"-button. Looks up which game type has been selected in '#boardgameoptions' field, builds a session bean and sends it to the rest endpoint.
+ * triggered by "start"-button. Looks up which game type has been selected in '#boardgameoptions' field, builds a
+ * session bean and sends it to the rest endpoint.
  */
 function startSession() {
 
@@ -236,7 +237,8 @@ function startSession() {
 }
 
 /**
- * Analyzes a received sessions object and tells whether the provided player is associated as creator-or-player in at least one session.
+ * Analyzes a received sessions object and tells whether the provided player is associated as creator-or-player in at
+ * least one session.
  * @param playername
  * @param sessions
  */
@@ -380,23 +382,33 @@ function forwardToSessionLanding(sessionId) {
     $.each(allSessions, function (key, session) {
         if (key === sessionId) {
 
-            // Note: the location provided within the gameParameters property CAN be a docker-intern locator (e.g. "lobby", "xox") rather than a location resolvable by the browser.
-            // Currently the BGP assumes all services run on the same location, therefore a partial address preservation (as implemented below) sidesteps this problem.
-            // On the long run the registration of services with an enabled "web" flag, contain an additional landing page locator (resolvable by a browser, outside the virtual docker network)
+            // Note: the location provided within the gameParameters property CAN be a docker-intern locator (e.g.
+            // "lobby", "xox") rather than a location resolvable by the browser. Currently the BGP assumes all services
+            // run on the same location, therefore a partial address preservation (as implemented below) sidesteps this
+            // problem. On the long run the registration of services with an enabled "web" flag, contain an additional
+            // landing page locator (resolvable by a browser, outside the virtual docker network)
 
             // step 0: preserve protocol
-            let protocol = window.location.href.split(':')[0] +":";
+            let protocol = window.location.href.split(':')[0] + ":";
 
             // step 1: preserve current server location as prefix (location+':') (without the http://|https:// prefix)
             // Note: protocol information (http/https) is not provided - auto resolved by browser.
-            // Algo: if there are two ':' in string (port provided) then split at second ':'. otherwise split at first occurence of '/' after the ':'. (is equal to third occurence of '/')
-            let serverLocation = window.location.href.split(':')[1] +":";
-            if((( window.location.href.match(/:/g) || []).length) === 1)
+            // Algo: if there are two ':' in string (port provided) then split at second ':'. otherwise split at first
+            // occurence of '/' after the ':'. (is equal to third occurence of '/')
+            let serverLocation = window.location.href.split(':')[1] + ":";
+            if (((window.location.href.match(/:/g) || []).length) === 1)
                 // if the original URL did not contain a port. shorten until the third '/'
-                serverLocation = "//" + serverLocation.split('/')[2] +":";
+                serverLocation = "//" + serverLocation.split('/')[2] + ":";
 
-            // step 2: build the relative location (will be used as suffix) based on the gameservice registry information. (port + landing resource)
-            let serviceInternalLocation = session.gameParameters.location + '/webui/games/' + sessionId; // Note: no token in URL required - is stored within cookie
+            // step 2: build the relative location (will be used as suffix) based on the gameservice registry
+            // information. (port + landing resource)
+            let serviceInternalLocation = session.gameParameters.location + '/webui/games/' + sessionId; // Note: no
+                                                                                                         // token in
+                                                                                                         // URL
+                                                                                                         // required -
+                                                                                                         // is stored
+                                                                                                         // within
+                                                                                                         // cookie
             let serviceRelativeLocation = serviceInternalLocation.split(':')[2];
 
             // Construct the resulting landing url, that is resolvable by browser.
