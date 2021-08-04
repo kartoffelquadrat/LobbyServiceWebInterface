@@ -18,7 +18,7 @@
 </head>
 
 <!--"onload"-script removes API unreachable warning if backend was successfully tested-->
-<body onload="anonymousIntercept();timedTokenRenew();setupNavbar();testApiOnline();registerButtonHandlers();updateDisplayedAccounts();">
+<body onload="anonymousIntercept();timedTokenRenew();setupNavbar();testApiOnline();registerButtonHandlers();updateDisplayedAccounts();updateDisplayedGameServices();">
 <div id=RowDivWithBackground class="container bg-white fill">
 
     <!--dynamic load would be better than static copies over different html files. But it causes issues with the handler mapping (order messed up / unreliable.)-->
@@ -105,12 +105,15 @@
         <br/>
         <h3>Registered Users</h3>
         <div class="mt-3">
-            <table class="table table-hover" id="playertable"/>
+            <table class="table table-hover" id="playertable"></table>
         </div>
 
-        <!--    <br/>-->
-        <!--    <h3>Registered Services</h3>-->
-        <!--    TODO: add section to force-unregister registered game-services.-->
+        <!-- list of registered game services, details and force unregister options -->
+        <h3>Registered Game Services</h3>
+        <div class="mt-3">
+            <table class="table table-hover" id="servicetable"></table>
+        </div>
+        <br/>
 
         <!--    <br/>-->
         <!--    <h3>Registered Sessions</h3>-->

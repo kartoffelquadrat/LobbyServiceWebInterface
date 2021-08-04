@@ -124,7 +124,8 @@ function updateUserColour(user) {
             'Content-Type': 'application/json'
         },
         method: 'post',
-        body: JSON.stringify(postdata)})
+        body: JSON.stringify(postdata)
+    })
         .then(reply => {
             if (reply.ok)
 
@@ -160,7 +161,8 @@ function updateUserPassword(user) {
             'Content-Type': 'application/json'
         },
         method: 'post',
-        body: JSON.stringify(postdata)})
+        body: JSON.stringify(postdata)
+    })
         .then(reply => {
             if (reply.ok)
 
@@ -196,7 +198,7 @@ function deleteUser(user) {
 }
 
 /**
- * Retrieves an updated list of existing accounts from the server and re-renders the displayed accounts.
+ * Retrieves an updated list of existing accounts from the backend and re-renders the displayed account list.
  */
 function updateDisplayedAccounts() {
 
@@ -217,9 +219,29 @@ function updateDisplayedAccounts() {
         });
 }
 
+/**
+ * Retrieves an updated list of existing game services from the backend and re-renders the displayed service list.
+ */
+function updateDisplayedGameServices() {
+
+    // retrieve the list of registered game services from the API
+    fetch(getContextPath() + '/api/gameservices?access_token=' + getAccessToken())
+        .then(result => result.json())
+        .then(json => {
+            if (json.error)
+                throw Error(json.error);
+            else {
+                console.log("Retrieved serivces are:" + json);
+                fillServicesTable(json);
+            }
+        })
+        .catch(error => { // redirect to login in case the credentials were rejected.
+            console.log(error);
+            location.replace(getContextPath() + '/');
+        });
+}
+
 function fillAccountsTable(userdb) {
-    //console.log(registeredPlayersJsonString);
-    //let registererdPlayers = JSON.parse(registeredPlayersJsonString);
 
     // reset player table content and re-build table's static column names
     $('#playertable').empty();
@@ -239,9 +261,9 @@ function fillAccountsTable(userdb) {
             '<td>' + capitalizeFirstLetter(player.name) + '</td>' +
 
             // Salted hash of password
-            '  <td><div class="input-group mb-3"><input id="password-field-'+player.name+'" type="password" class="form-control" aria-describedby="basic-addon2" placeholder="****************">' +
+            '  <td><div class="input-group mb-3"><input id="password-field-' + player.name + '" type="password" class="form-control" aria-describedby="basic-addon2" placeholder="****************">' +
             '  <div class="input-group-append">' +
-            '    <button class="btn btn-outline-secondary" type="button" id="password-edit-'+player.name+'">Update</button>' +
+            '    <button class="btn btn-outline-secondary" type="button" id="password-edit-' + player.name + '">Update</button>' +
             '  </div></div></td>' +
 
             // Role of player
@@ -262,5 +284,70 @@ function fillAccountsTable(userdb) {
         $('#remove-' + player.name).on('click', {id: player.name}, deleteUser);
         $('#colour-edit-' + player.name).on('click', {id: player.name}, updateUserColour);
         $('#password-edit-' + player.name).on('click', {id: player.name}, updateUserPassword);
+    });
+}
+
+/**
+ * Retrieves detailed information for a specific game service (by name-id) and adds an entry into the prepared
+ * gameservice table (including a "force unregister" button).
+ */
+function fetchAndDisplaySingleGameServiceDetails(service) {
+    console.log("Updating info for: " + service.name);
+
+    fetch(getContextPath() + '/api/gameservices/'+service.name+'?access_token=' + getAccessToken())
+        .then(result => result.json())
+        .then(service_details => {
+            if (service_details.error)
+                throw Error(service_details.error);
+            else {
+                // add a table entry with the retrieved details
+                console.log("Service Detail:" + service_details);
+                $('<tbody><tr>' +
+
+                    // Service id-name
+                    '<td>' + service_details.name + '</td>' +
+
+                    // Service display-name
+                    '<td>\'' + service_details.displayName + '\'</td>' +
+
+                    // Service location
+                    '<td><a href="' + service_details.location + '">'+service_details.location+'</a></td>' +
+
+                    // Service player range
+                    '<td> [' + service_details.minSessionPlayers + ' - ' + service_details.maxSessionPlayers +']</td>' +
+
+                    // a button to force unregister the service
+                    '<td>        ' +
+                    '<div class="input-group-append">\n' +
+                    '<button class="btn btn-outline-danger" type="button" id="remove-' + service_details.name + '">Force unregister</button>\n' +
+                    '</div>' +
+                    '</td>' +
+                    '</tr></tbody>').appendTo('#servicetable');
+            }
+        })
+        .catch(error => { // redirect to login in case the credentials were rejected.
+            console.log(error);
+            location.replace(getContextPath() + '/');
+        });
+
+}
+
+function fillServicesTable(gameServices) {
+
+    // reset gameservice table content and re-build table's static column names
+    $('#servicetable').empty();
+    $('<tr>' +
+        '<th class="span1" id="serviceName">Name</th>' +
+        '<th class="span3" id="serivceDisplayName">Display Name</th>' +
+        '<th class="span1" id="location">Location</th>' +
+        '<th class="span2" id="owner">Player Min-Max</th>' + // span 2 does not seem to work here :/
+        '<th class="span1" class="text-center" id="actions">Actions</th>' +
+        '</tr>'
+    ).appendTo('#servicetable');
+    console.log('Ready to fill with content...');
+
+    // for every game-service, trigger fetch-details and update table entry
+    $.each(gameServices, function (key, service) {
+        fetchAndDisplaySingleGameServiceDetails(service);
     });
 }

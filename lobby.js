@@ -344,6 +344,8 @@ function associateLaunchButtons() {
         if (!$(launchButton).hasClass('disabled'))
             $(launchButton).on('click', function (event) {
                 launchSession(sessionId);
+                //TODO: grey out the launch button
+                $(launchButton).disable();
             });
     });
 }
