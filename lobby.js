@@ -343,9 +343,12 @@ function associateLaunchButtons() {
         let sessionId = launchButton.id.substring(7);
         if (!$(launchButton).hasClass('disabled'))
             $(launchButton).on('click', function (event) {
+
+                // Mark as disabled and remove click listener, so an impatient user can not launch the game twice.
+                $(launchButton).addClass("disabled");
+                $(launchButton).off();
+                $(launchButton).text("Launching...")
                 launchSession(sessionId);
-                //TODO: grey out the launch button
-                $(launchButton).disable();
             });
     });
 }
