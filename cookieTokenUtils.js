@@ -111,12 +111,19 @@ function getAccessTokenExpiryMoment() {
 }
 
 /**
- * Returns the system time at which the access token will expire. (Not to be confused with the remaining time until its
- * expiry)
+ * Returns the REST resource location to renew OAuth2 tokens.
  */
 function getOauthContext() {
     return readCookie('oauth2-context');
 }
+
+/**
+ * Returns the current user role, associated to the received token.
+ */
+function getRole() {
+    return readCookie('role');
+}
+
 
 /**
  * Returns (based on the expiry moment) the amount of millisecond remaining until the access token expiry (including a
@@ -135,6 +142,7 @@ function logout() {
     document.cookie = "access-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
     document.cookie = "refresh-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
     document.cookie = "access-token-expiry-moment=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+    document.cookie = "role==; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
     window.location.replace(getContextPath());
 }
 

@@ -18,15 +18,20 @@
 </head>
 
 <!--"onload"-script removes API unreachable warning if backend was successfully tested-->
-<body onload="anonymousIntercept();timedTokenRenew();setupNavbar();testApiOnline();registerButtonHandlers();updateDisplayedAccounts();updateDisplayedGameServices();">
+<body onload="anonymousIntercept();timedTokenRenew();setupNavbar('Lobby');testApiOnline();registerButtonHandlers();updateDisplayedAccounts();updateDisplayedGameServices();">
 <div id=RowDivWithBackground class="container bg-white fill">
 
+<!--    TODO: build navbar dynamically in navbar script. Remove all duplicated structure from HTML files.-->
     <!--dynamic load would be better than static copies over different html files. But it causes issues with the handler mapping (order messed up / unreliable.)-->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="navbar  w-100 order-3">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <button id="logout-button" type="button" class="btn btn-outline-primary">
+                    <button id="toggle-button" type="button" class="btn btn-outline-primary mr-1">
+                    </button>
+                </li>
+                <li class="nav-item">
+                <button id="logout-button" type="button" class="btn btn-outline-primary">
                         Log
                         out <a id="username-display"></a>
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"

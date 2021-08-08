@@ -19,7 +19,7 @@
 </head>
 
 <!--"onload"-script removes API unreachable warning if backend was successfully tested-->
-<body onload="anonymousIntercept();timedTokenRenew();setupNavbar();testApiOnline();prepareLobbyPage()">
+<body onload="anonymousIntercept();timedTokenRenew();setupNavbar('Admin Zone');testApiOnline();prepareLobbyPage()">
 <div id=RowDivWithBackground class="container fill bg-white">
 
     <!--dynamic load would be better than static copies over different html files. But it causes issues with the handler mapping (order messed up / unreliable.)-->
@@ -35,6 +35,10 @@
                             <path fill-rule="evenodd"
                                   d="M11.5 2a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM9.05 3a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0V3h9.05zM4.5 7a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM2.05 8a2.5 2.5 0 0 1 4.9 0H16v1H6.95a2.5 2.5 0 0 1-4.9 0H0V8h2.05zm9.45 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm-2.45 1a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0v-1h9.05z"></path>
                         </svg>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button id="toggle-button" type="button" class="btn btn-outline-primary mr-1">
                     </button>
                 </li>
                 <li class="nav-item">

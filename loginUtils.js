@@ -95,6 +95,9 @@ function forwardToLanding() {
     fetch(getContextPath() + '/oauth/role?access_token=' + getAccessToken())
         .then(result => result.json())
         .then(json => {
+            // Save role in session cookie (UI navbar changes depending on role)
+            document.cookie = "role="+json[0].authority+";path=/";
+
             // Redirect players to session panel, admins to user management panel
             if (json[0].authority === 'ROLE_PLAYER')
                 window.location.href = getContextPath() + "/lobby.html";
