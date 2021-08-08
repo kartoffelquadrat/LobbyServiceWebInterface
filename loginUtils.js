@@ -45,22 +45,9 @@ function login() {
 
     // Lobby Service authentication meta-parameters and HTTP method
     const init = {
-        body: "grant_type=password&username=" + username + "&password=" + password.replace(/\+/g, "%2B"), // Note: plus
-                                                                                                          // escaping
-                                                                                                          // required
-                                                                                                          // here since
-                                                                                                          // body
-                                                                                                          // follows
-                                                                                                          // URL param
-                                                                                                          // syntax and
-                                                                                                          // is parsed
-                                                                                                          // like an
-                                                                                                          // URL string
-                                                                                                          // on server
-                                                                                                          // side (see
-                                                                                                          // header
-                                                                                                          // parameter
-                                                                                                          // "urlencoded").
+        body: "grant_type=password&username=" + username + "&password=" + password.replace(/\+/g, "%2B"),
+        // Note: plus escaping required here since body
+        // follows URL param syntax and is parsed like an URL string on server side (see header parameter "urlencoded").
         headers: {
             Authorization: "Basic YmdwLWNsaWVudC1uYW1lOmJncC1jbGllbnQtcHc=", // echo -n "bgp-client-name:bgp-client-pw"
                                                                              // | base64
@@ -85,7 +72,8 @@ function login() {
                 // Compute exact moment (absolute) when token will expire
                 let expiryMoment = computeExpiryMoment(json.expires_in);
 
-                // save location used for login (current page) so this oauth2 endpoint can be contacted, even in case of a forward to other domains / ports.
+                // save location used for login (current page) so this oauth2 endpoint can be contacted, even in case
+                // of a forward to other domains / ports.
                 let authority_context = window.location.href;
 
                 persistLogin(username, json.access_token, json.refresh_token, expiryMoment, authority_context);
@@ -95,7 +83,6 @@ function login() {
     // Apparently not possible to force DOM update from promise finally. Therefore redirect to same page and fore
     // reload if bad credentials.
 }
-
 
 
 /**
@@ -111,6 +98,8 @@ function forwardToLanding() {
             // Redirect players to session panel, admins to user management panel
             if (json[0].authority === 'ROLE_PLAYER')
                 window.location.href = getContextPath() + "/lobby.html";
+            else if (json[0].authority === 'ROLE_SERVICE')
+                window.location.href = getContextPath() + "/service.html";
             else
                 window.location.href = getContextPath() + "/admin.html";
         })
