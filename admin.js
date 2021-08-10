@@ -186,11 +186,14 @@ function deleteUser(user) {
         method: 'delete',
     })
         .then(reply => {
-            if (reply.ok)
-
+            if (reply.ok) {
                 // update list of displayed users
                 updateDisplayedAccounts();
-            else {
+
+                // update list of registered services, too (removing service account implicitly removes associated
+                // registered services)
+                updateDisplayedGameServices();
+            } else {
                 reply.text()
                     .then(text => alert(text));
             }
@@ -294,7 +297,7 @@ function fillAccountsTable(userdb) {
 function fetchAndDisplaySingleGameServiceDetails(service) {
     console.log("Updating info for: " + service.name);
 
-    fetch(getContextPath() + '/api/gameservices/'+service.name+'?access_token=' + getAccessToken())
+    fetch(getContextPath() + '/api/gameservices/' + service.name + '?access_token=' + getAccessToken())
         .then(result => result.json())
         .then(service_details => {
             if (service_details.error)
@@ -308,9 +311,9 @@ function fetchAndDisplaySingleGameServiceDetails(service) {
                     // Service display-name
                     '<td>\'' + service_details.displayName + '\'</td>' +
                     // Service location
-                    '<td><a href="' + service_details.location + '">'+service_details.location+'</a></td>' +
+                    '<td><a href="' + service_details.location + '">' + service_details.location + '</a></td>' +
                     // Service player range
-                    '<td> [' + service_details.minSessionPlayers + ' - ' + service_details.maxSessionPlayers +']</td>' +
+                    '<td> [' + service_details.minSessionPlayers + ' - ' + service_details.maxSessionPlayers + ']</td>' +
                     // a button to force unregister the service
                     '<td>        ' +
                     '<div class="input-group-append">\n' +
@@ -320,7 +323,9 @@ function fetchAndDisplaySingleGameServiceDetails(service) {
                     '</tr></tbody>').appendTo('#servicetable');
 
                 // Add handler for delete button
-                $('#unregister-' + service_details.name).on('click', function unregisterClojure() {unregisterService(service_details.name);});
+                $('#unregister-' + service_details.name).on('click', function unregisterClojure() {
+                    unregisterService(service_details.name);
+                });
             }
         })
         .catch(error => { // redirect to login in case the credentials were rejected.
@@ -342,8 +347,7 @@ function unregisterService(service_name) {
             if (reply.ok) {
                 // update list of displayed users
                 updateDisplayedGameServices();
-            }
-            else {
+            } else {
                 reply.text()
                     .then(text => alert(text));
             }
