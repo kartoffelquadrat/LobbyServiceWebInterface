@@ -12,16 +12,31 @@ function setupNavbar(toggleTarget) {
     // Assign logout function to logout button.
     $('#logout-button').on('click', logout);
 
-    // If the user is an admin, fill additional button to toggle lobby and admin mode.
+    // Assign redirect to settings page to settings button
+    $('#settings-button').on('click', function () {
+        window.location.href = getContextPath() + "/settings.html";
+    })
+
+    // If there is a dedicated lobby button (only present on settings page), associate forward to lobby function
+    $('#lobby-button').on('click', function () {
+        window.location.href = getContextPath() + "/lobby.html";
+    })
+
+    // If the user is an admin, fill additional button to toggle lobby and admin mode (or just go to admin zone if
+    // currenlty settings page displayed)
     if (getRole() === 'ROLE_ADMIN') {
 //        console.log('Adding lobby/admin mode toggle button to navbar.');
         $('#toggle-button').text(toggleTarget);
 
         // Add a link
-        if(toggleTarget.toLowerCase().includes('lobby'))
-            $('#toggle-button').on('click', function() {window.location.href = getContextPath() + "/lobby.html";});
+        if (toggleTarget.toLowerCase().includes('admin'))
+            $('#toggle-button').on('click', function () {
+                window.location.href = getContextPath() + "/admin.html";
+            });
         else
-            $('#toggle-button').on('click', function() {window.location.href = getContextPath() + "/admin.html";});
+            $('#toggle-button').on('click', function () {
+                window.location.href = getContextPath() + "/lobby.html";
+            });
     }
 
     // Normal users should not see this button at all.
