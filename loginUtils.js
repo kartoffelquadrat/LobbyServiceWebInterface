@@ -99,12 +99,10 @@ function forwardToLanding() {
             document.cookie = "role="+json[0].authority+";path=/";
 
             // Redirect players to session panel, admins to user management panel
-            if (json[0].authority === 'ROLE_PLAYER')
-                window.location.href = getContextPath() + "/lobby.html";
-            else if (json[0].authority === 'ROLE_SERVICE')
+            if (json[0].authority === 'ROLE_SERVICE')
                 window.location.href = getContextPath() + "/service.html";
             else
-                window.location.href = getContextPath() + "/admin.html";
+                window.location.href = getContextPath() + "/lobby.html";
         })
 }
 

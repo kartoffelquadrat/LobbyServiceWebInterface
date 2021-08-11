@@ -26,15 +26,17 @@ function setupNavbar(toggleTarget) {
     // currenlty settings page displayed)
     if (getRole() === 'ROLE_ADMIN') {
 //        console.log('Adding lobby/admin mode toggle button to navbar.');
-        $('#toggle-button').text(toggleTarget);
+        $('#lobby-or-admin-button').text(toggleTarget);
 
         // Add a link
-        if (toggleTarget.toLowerCase().includes('admin'))
-            $('#toggle-button').on('click', function () {
+        if (toggleTarget.toLowerCase().includes('admin')) {
+            $('#lobby-or-admin-button').removeClass('btn-outline-primary');
+            $('#lobby-or-admin-button').addClass('btn-outline-danger');
+            $('#lobby-or-admin-button').on('click', function () {
                 window.location.href = getContextPath() + "/admin.html";
             });
-        else
-            $('#toggle-button').on('click', function () {
+        } else
+            $('#lobby-or-admin-button').on('click', function () {
                 window.location.href = getContextPath() + "/lobby.html";
             });
     }
@@ -42,7 +44,7 @@ function setupNavbar(toggleTarget) {
     // Normal users should not see this button at all.
     else {
         // else remove the button entirely
-        $('#toggle-button').remove();
+        $('#lobby-or-admin-button').remove();
     }
 }
 

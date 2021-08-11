@@ -13,7 +13,7 @@
 </head>
 
 <!--"onload"-script removes API unreachable warning if backend was successfully tested-->
-<body onload="anonymousIntercept();timedTokenRenew();setupNavbar('Admin');testApiOnline();">
+<body onload="anonymousIntercept();timedTokenRenew();setupNavbar('Admin Zone');testApiOnline();">
 <div id=RowDivWithBackground class="container fill bg-white">
 
     <!--dynamic load would be better than static copies over different html files. But it causes issues with the handler mapping (order messed up / unreliable.)-->
@@ -21,12 +21,12 @@
         <div class="navbar  w-100 order-3">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <button id="lobby-button" type="button" class="btn btn-outline-primary  mr-1">
-                        Lobby
+                    <button id="lobby-or-admin-button" type="button" class="btn btn-outline-primary mr-1">
                     </button>
                 </li>
                 <li class="nav-item">
-                    <button id="toggle-button" type="button" class="btn btn-outline-primary mr-1">
+                    <button id="lobby-button" type="button" class="btn btn-outline-primary  mr-1">
+                        Lobby
                     </button>
                 </li>
                 <li class="nav-item">
