@@ -216,9 +216,9 @@ function updateDisplayedAccounts() {
                 fillAccountsTable(json);
             }
         })
-        .catch(error => { // redirect to login in case the credentials were rejected.
+        .catch(error => { // logout, redirect to login in case the credentials were rejected.
             console.log(error);
-            location.replace(getContextPath() + '/');
+            logout();
         });
 }
 
