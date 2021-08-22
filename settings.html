@@ -13,7 +13,7 @@
 </head>
 
 <!--"onload"-script removes API unreachable warning if backend was successfully tested-->
-<body onload="anonymousIntercept();timedTokenRenew();setupNavbar('settings');getUserDataAndFillPreferenceTable();">
+<body onload="anonymousIntercept();timedTokenRenew();setupNavbar('settings');getUserDataAndFillPreferenceTable();registerButtonHandlers();">
 <div id=RowDivWithBackground class="container fill bg-white">
 
     <!--dynamic load would be better than static copies over different html files. But it causes issues with the handler mapping (order messed up / unreliable.)-->
@@ -55,8 +55,12 @@
                 <tr>
                     <td><b>Password</b>:</td>
                     <td>
-                        <input id="password-input text-right" type="password" class="form-control"
+                        <input id="password-field" type="password" class="form-control"
                                aria-describedby="basic-addon2" placeholder="****************">
+                        <small id="passwordHelpBlock" class="form-text text-muted">
+                            <!--                    (?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,32} -->
+                            8-32 characters long, at least one upper, lower, digit, special char.
+                        </small>
                     </td>
                     <td>
                         <div class="text-right">
@@ -94,8 +98,7 @@
                     </td>
                     <td>
                         <div class="text-right">
-                            <button class="btn btn-outline-danger" type="button" id="remove-account">Delete my
-                                Account!
+                            <button class="btn btn-outline-danger" type="button" id="remove-account">Delete Account
                             </button>
                         </div>
                     </td>

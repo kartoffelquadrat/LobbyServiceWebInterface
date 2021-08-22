@@ -104,9 +104,9 @@ function createNewUser() {
 
 
 /**
- * Sends an API request to update the colour of an existing user.
+ * Sends an API request to update the colour of an existing user. Only for use by admins.
  */
-function updateUserColour(user) {
+function updateDynamicUserColour(user) {
 
     // Find out which user was clicked
     let username = user.data.id;
@@ -139,9 +139,9 @@ function updateUserColour(user) {
 }
 
 /**
- * Sends an API request to update the password of an existing user.
+ * Sends an API request to update the password of an existing user. Only for use by admins.
  */
-function updateUserPassword(user) {
+function updateDynamicUserPassword(user) {
 
     // Find out which user was clicked
     let username = user.data.id;
@@ -149,7 +149,7 @@ function updateUserPassword(user) {
     //extract next password from input field
     let passwordField = document.getElementById('password-field-' + username);
     let nextPassword = passwordField.value;
-    console.log('Changing password colour of ' + username + ' to: ----------');
+    console.log('Changing password of ' + username + ' to: ----------');
 
     // build a payload object that complies to the format expected by the backend:
     // Note: old password is not needed, for an admin token is used to authenticate the request.
@@ -176,10 +176,10 @@ function updateUserPassword(user) {
 }
 
 /**
- * Sends a request to api to delete an existing user by name
+ * Sends a request to api to delete an existing user by name. Only for use by admins.
  * @param user
  */
-function deleteUser(user) {
+function deleteDynamicUser(user) {
     console.log("Deleting user: " + user.data.id);
     // postToApi(null, "/accounts/" + user.data.id + "/", "");
     fetch(getContextPath() + '/api/users/' + user.data.id + '?access_token=' + getAccessToken(), {
@@ -284,9 +284,9 @@ function fillAccountsTable(userdb) {
             '</tr></tbody>').appendTo('#playertable');
 
         // also register callback for the newly created "remove" and "update' button.
-        $('#remove-' + player.name).on('click', {id: player.name}, deleteUser);
-        $('#colour-edit-' + player.name).on('click', {id: player.name}, updateUserColour);
-        $('#password-edit-' + player.name).on('click', {id: player.name}, updateUserPassword);
+        $('#remove-' + player.name).on('click', {id: player.name}, deleteDynamicUser);
+        $('#colour-edit-' + player.name).on('click', {id: player.name}, updateDynamicUserColour);
+        $('#password-edit-' + player.name).on('click', {id: player.name}, updateDynamicUserPassword);
     });
 }
 
