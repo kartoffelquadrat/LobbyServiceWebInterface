@@ -4,8 +4,7 @@ A web interface for the [Lobby-Service](https://github.com/kartoffelquadrat/Lobb
 
 ## About
 
-This repository contains the sources for an inofficial LobbyService WebUi.
-It is referenced as sub-repository by the LobbyService master, but is not pulled unless the git users has access to this additional repository.
+This repository contains the sources of a sample LobbyService Web Interface. This interface is also part of the [Board Game Platform](https://github.com/kartoffelquadrat/BoardGamePlatform) bundle.
 
 ## Setup
 
